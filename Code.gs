@@ -770,14 +770,15 @@ ${journalTexte}
 ${profileStr}
 
 Donne 3 conseils très courts, concrets et motivants pour l'aider à anticiper et équilibrer ses repas de DEMAIN.
-N'utilise pas de formatage Markdown complexe, juste du texte simple avec des sauts de ligne ou des tirets normaux. Va droit au but, pas de longue introduction.`;
+N'utilise pas de formatage Markdown complexe, juste du texte simple avec des sauts de ligne ou des tirets normaux. Va droit au but, pas de longue introduction.
+Réponds impérativement en français.`;
 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`;
     const payload = {
         "contents": [{ "parts": [{ "text": prompt }] }],
         "generationConfig": {
             "temperature": 0.4,
-            "maxOutputTokens": 300
+            "maxOutputTokens": 1000
         }
     };
 
@@ -794,7 +795,13 @@ N'utilise pas de formatage Markdown complexe, juste du texte simple avec des sau
         if (response.getResponseCode() === 200) {
             const result = JSON.parse(response.getContentText());
             if (result.candidates && result.candidates.length > 0) {
-                aiAdvice = result.candidates[0].content.parts[0].text.trim();
+                const candidate = result.candidates[0];
+                if (candidate.content && candidate.content.parts) {
+                    aiAdvice = candidate.content.parts.map(p => p.text || "").join("").trim();
+                }
+                if (candidate.finishReason && candidate.finishReason !== "STOP") {
+                    aiAdvice += `\n\n[Attention: Génération interrompue. Raison = ${candidate.finishReason}]`;
+                }
             }
         } else {
             aiAdvice = "Erreur API : " + response.getContentText();
