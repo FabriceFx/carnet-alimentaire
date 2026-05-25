@@ -402,7 +402,13 @@ function generateFoodDiaryDoc() {
  */
 function createFilteredSheet() {
     const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-    const sourceSheet = spreadsheet.getActiveSheet();
+    const sourceSheet = getInputSheet();
+    
+    if (!sourceSheet) {
+        SpreadsheetApp.getUi().alert("Erreur : Feuille de carnet introuvable.");
+        return;
+    }
+    
     const data = sourceSheet.getDataRange().getValues();
 
     if (data.length <= 1) {
@@ -410,13 +416,16 @@ function createFilteredSheet() {
         return;
     }
 
-    // On récupère l'en-tête
+    // On récupère l'en-tête et l'index dynamique de la colonne "Menu"
     const header = data[0];
+    const headerRow = header.map(h => String(h).toLowerCase().trim());
+    const colMenu = headerRow.findIndex(h => h.includes("menu"));
+    const iMenu = colMenu >= 0 ? colMenu : 3;
     
     // On filtre les lignes pour ne garder que celles ayant un menu renseigné
     // (Considérant qu'une saisie "absente" est une ligne sans repas ou notée comme telle)
     const filteredRows = data.slice(1).filter(row => {
-        const menu = String(row[3] || '').trim().toLowerCase();
+        const menu = String(row[iMenu] || '').trim().toLowerCase();
         return menu !== '' && menu !== 'absent' && menu !== 'absente' && menu !== 'néant' && menu !== 'rien';
     });
 
