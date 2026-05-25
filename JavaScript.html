@@ -1,6 +1,6 @@
 <script>
-  // 1. Récupération de la locale injectée par le serveur (défaut : 'en')
-  const USER_LOCALE = "<?!= locale ?>".toLowerCase().startsWith('fr') ? 'fr' : 'en';
+  // 1. Récupération de la locale injectée par le serveur via la variable globale SERVER_LOCALE
+  const USER_LOCALE = (typeof SERVER_LOCALE !== 'undefined' ? SERVER_LOCALE : 'en').toLowerCase().startsWith('fr') ? 'fr' : 'en';
 
   // 2. Dictionnaire de traduction global de l'application
   const TRANSLATIONS = {
