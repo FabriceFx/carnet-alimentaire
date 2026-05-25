@@ -8,6 +8,8 @@ function onOpen() {
         .addItem('Mon Profil', 'showProfile')
         .addItem('Générer le Google Doc', 'generateFoodDiaryDoc')
         .addItem('Créer feuille filtrée (saisies)', 'createFilteredSheet')
+        .addSeparator()
+        .addItem('Paramètres (Clé API)', 'showSettings')
         .addToUi();
         
     checkInputSheet();
@@ -96,6 +98,40 @@ function showProfile() {
         .setWidth(400)
         .setHeight(500);
     SpreadsheetApp.getUi().showModalDialog(html, 'Profil Utilisateur');
+}
+
+/**
+ * Affiche la boîte de dialogue des paramètres (Clé API).
+ */
+function showSettings() {
+    const html = HtmlService.createHtmlOutputFromFile('Settings')
+        .setTitle('Paramètres - Intelligence Artificielle')
+        .setWidth(450)
+        .setHeight(350);
+    SpreadsheetApp.getUi().showModalDialog(html, 'Paramètres - Intelligence Artificielle');
+}
+
+/**
+ * Récupère la clé API stockée.
+ */
+function getApiKey() {
+    return PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY') || '';
+}
+
+/**
+ * Sauvegarde la clé API.
+ */
+function saveApiKey(key) {
+    try {
+        if (!key) {
+            PropertiesService.getScriptProperties().deleteProperty('GEMINI_API_KEY');
+        } else {
+            PropertiesService.getScriptProperties().setProperty('GEMINI_API_KEY', key);
+        }
+        return true;
+    } catch (e) {
+        return false;
+    }
 }
 
 /**
