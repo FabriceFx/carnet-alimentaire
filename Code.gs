@@ -589,13 +589,13 @@ ${journalTexte}`;
         if (json.candidates && json.candidates.length > 0) {
             const candidate = json.candidates[0];
             let text = "";
-            if (candidate.content && candidate.content.parts && candidate.content.parts.length > 0) {
-                text = candidate.content.parts[0].text.trim();
+            if (candidate.content && candidate.content.parts) {
+                text = candidate.content.parts.map(p => p.text || "").join("");
             }
             if (candidate.finishReason && candidate.finishReason !== "STOP") {
                 text += `\n[Info technique: Génération interrompue. Raison = ${candidate.finishReason}]`;
             }
-            if (text) return text;
+            if (text) return text.trim();
         }
         if (json.error) {
             return "Erreur de l'API : " + json.error.message;
