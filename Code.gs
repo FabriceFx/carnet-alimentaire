@@ -20,6 +20,7 @@ function onOpen() {
         .addItem('Générer le Google Doc', 'generateFoodDiaryDoc')
         .addItem('Créer feuille filtrée (saisies)', 'createFilteredSheet')
         .addSeparator()
+        .addItem("Activer/Désactiver l'email du soir", 'toggleDailyEmail')
         .addItem('Paramètres (clé API)', 'showSettings')
         .addToUi();
 
@@ -99,6 +100,38 @@ function showSidebar() {
     template.locale = Session.getActiveUserLocale();
     const html = template.evaluate().setTitle('Saisie de repas').setWidth(300);
     SpreadsheetApp.getUi().showSidebar(html);
+}
+
+/**
+ * Active ou désactive le déclencheur quotidien pour l'envoi de conseils par e-mail.
+ */
+function toggleDailyEmail() {
+    const triggerName = 'sendDailyAdviceEmail';
+    const triggers = ScriptApp.getProjectTriggers();
+    let triggerFound = false;
+
+    // Cherche le déclencheur
+    for (let i = 0; i < triggers.length; i++) {
+        if (triggers[i].getHandlerFunction() === triggerName) {
+            ScriptApp.deleteTrigger(triggers[i]);
+            triggerFound = true;
+        }
+    }
+
+    const ui = SpreadsheetApp.getUi();
+
+    if (triggerFound) {
+        ui.alert('Notifications désactivées', "Vous ne recevrez plus l'e-mail quotidien de conseils diététiques.", ui.ButtonSet.OK);
+    } else {
+        // Création du déclencheur à 22h00
+        ScriptApp.newTrigger(triggerName)
+            .timeBased()
+            .atHour(22)
+            .everyDays(1)
+            .create();
+            
+        ui.alert('Notifications activées', "Super ! Vous recevrez désormais chaque soir vers 22h00 un e-mail contenant des conseils diététiques pour le lendemain, générés par l'IA.", ui.ButtonSet.OK);
+    }
 }
 
 /**
@@ -663,5 +696,144 @@ ${journalTexte}`;
         return "Impossible de générer l'analyse. Réponse de l'API : " + response.getContentText();
     } catch (e) {
         return "Erreur lors de l'analyse nutritionnelle : " + e.toString();
+    }
+}
+
+/**
+ * Fonction appelée automatiquement par le déclencheur temporel tous les jours.
+ * Génère des conseils et les envoie par e-mail.
+ */
+function sendDailyAdviceEmail() {
+    const apiKey = getApiKey();
+    if (!apiKey) return; // Si pas de clé, on ne fait rien silencieusement
+
+    const sheet = getInputSheet();
+    if (!sheet) return;
+
+    const data = sheet.getDataRange().getValues();
+    if (data.length <= 1) return;
+
+    // Récupérer la date du jour (format dd/MM/yyyy comme dans la feuille)
+    const tz = Session.getScriptTimeZone();
+    const todayDateObj = new Date();
+    const todayStr = Utilities.formatDate(todayDateObj, tz, "dd/MM/yyyy");
+
+    // Trouver les index des colonnes
+    const headerRow = data[0].map(h => String(h).toLowerCase().trim());
+    const colDate = headerRow.findIndex(h => h === "date");
+    const colPeriode = headerRow.findIndex(h => h.includes("période") || h.includes("categorie"));
+    const colHeure = headerRow.findIndex(h => h.includes("heure") || h.includes("lieu"));
+    const colMenu = headerRow.findIndex(h => h.includes("menu"));
+    const colQte = headerRow.findIndex(h => h.includes("quantité") || h.includes("quantite"));
+    const colCuisson = headerRow.findIndex(h => h.includes("cuisson") || h.includes("assaisonnement"));
+
+    const iDate = colDate >= 0 ? colDate : 0;
+    const iPeriode = colPeriode >= 0 ? colPeriode : 1;
+    const iHeure = colHeure >= 0 ? colHeure : 2;
+    const iMenu = colMenu >= 0 ? colMenu : 3;
+    const iQte = colQte >= 0 ? colQte : 4;
+    const iCuisson = colCuisson >= 0 ? colCuisson : 5;
+
+    // Filtrer les repas d'aujourd'hui
+    const repasAujourdhui = [];
+    for (let i = 1; i < data.length; i++) {
+        const rowDate = data[i][iDate];
+        let rowDateStr = "";
+        if (rowDate instanceof Date) {
+            rowDateStr = Utilities.formatDate(rowDate, tz, "dd/MM/yyyy");
+        } else {
+            rowDateStr = String(rowDate);
+        }
+        
+        if (rowDateStr === todayStr && data[i][iMenu]) {
+            repasAujourdhui.push(data[i]);
+        }
+    }
+
+    if (repasAujourdhui.length === 0) return; // Pas de saisie aujourd'hui = pas d'e-mail
+
+    // Formatage texte des repas
+    let journalTexte = repasAujourdhui.map(r => {
+        return `- ${r[iPeriode] || ''} : ${r[iMenu] || ''} | Qté: ${r[iQte] || 'N/A'}`;
+    }).join('\n');
+
+    // Récupérer le profil
+    const profileData = getProfileData() || {};
+    const profileStr = (profileData.nom || profileData.prenom)
+        ? `Profil du patient : ${profileData.prenom} ${profileData.nom}, Sexe: ${profileData.sexe}, Poids: ${profileData.poids}kg.`
+        : "";
+
+    // Préparation du prompt Gemini
+    const prompt = `Tu es un nutritionniste bienveillant. L'utilisateur a consommé ceci aujourd'hui :
+${journalTexte}
+
+${profileStr}
+
+Donne 3 conseils très courts, concrets et motivants pour l'aider à anticiper et équilibrer ses repas de DEMAIN.
+N'utilise pas de formatage Markdown complexe, juste du texte simple avec des sauts de ligne ou des tirets normaux. Va droit au but, pas de longue introduction.`;
+
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const payload = {
+        "contents": [{ "parts": [{ "text": prompt }] }],
+        "generationConfig": {
+            "temperature": 0.4,
+            "maxOutputTokens": 300
+        }
+    };
+
+    const options = {
+        "method": "post",
+        "contentType": "application/json",
+        "payload": JSON.stringify(payload),
+        "muteHttpExceptions": true
+    };
+
+    let aiAdvice = "Impossible de générer des conseils aujourd'hui.";
+    try {
+        const response = UrlFetchApp.fetch(url, options);
+        if (response.getResponseCode() === 200) {
+            const result = JSON.parse(response.getContentText());
+            if (result.candidates && result.candidates.length > 0) {
+                aiAdvice = result.candidates[0].content.parts[0].text.trim();
+            }
+        }
+    } catch (e) {
+        console.error("Erreur Gemini Email: " + e.message);
+    }
+
+    // Formatage HTML de l'e-mail
+    // On convertit les sauts de ligne en balises <br>
+    const formattedAdvice = aiAdvice.replace(/\n/g, '<br>');
+    const userName = profileData.prenom || "Bonjour";
+
+    const htmlBody = `
+        <div style="font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+            <div style="background-color: #0b57d0; padding: 24px; text-align: center;">
+                <h1 style="color: white; margin: 0; font-size: 22px; font-weight: 500;">Vos conseils pour demain 🥗</h1>
+            </div>
+            <div style="padding: 30px 24px; background-color: #ffffff; color: #3c4043; line-height: 1.6; font-size: 16px;">
+                <p style="margin-top: 0;">${userName === "Bonjour" ? userName : 'Bonsoir ' + userName},</p>
+                <p>Voici un petit point rapide sur votre journée et quelques conseils pour bien aborder demain :</p>
+                
+                <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-top: 24px; color: #1f2937;">
+                    ${formattedAdvice}
+                </div>
+                
+                <p style="margin-top: 24px; margin-bottom: 0;">Passez une excellente soirée !</p>
+            </div>
+            <div style="background-color: #f1f3f4; padding: 16px; text-align: center; color: #5f6368; font-size: 12px;">
+                <p style="margin: 0;">Carnet Alimentaire &bull; Généré par l'IA Gemini</p>
+            </div>
+        </div>
+    `;
+
+    try {
+        MailApp.sendEmail({
+            to: Session.getActiveUser().getEmail(),
+            subject: "Vos conseils diététiques pour demain 🥗",
+            htmlBody: htmlBody
+        });
+    } catch (e) {
+        console.error("Erreur d'envoi d'e-mail: " + e.message);
     }
 }
