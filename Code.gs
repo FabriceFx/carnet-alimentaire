@@ -266,6 +266,22 @@ function generateFoodDiaryDoc() {
             body.appendParagraph(profileText).setHeading(DocumentApp.ParagraphHeading.SUBTITLE);
         }
 
+        // Extraction de l'en-tête et définition dynamique des index de colonnes
+        const headerRow = data[0].map(h => String(h).toLowerCase().trim());
+        const colDate = headerRow.findIndex(h => h === "date");
+        const colPeriode = headerRow.findIndex(h => h.includes("période") || h.includes("categorie"));
+        const colHeure = headerRow.findIndex(h => h.includes("heure") || h.includes("lieu"));
+        const colMenu = headerRow.findIndex(h => h.includes("menu"));
+        const colQte = headerRow.findIndex(h => h.includes("quantité") || h.includes("quantite"));
+        const colCuisson = headerRow.findIndex(h => h.includes("cuisson") || h.includes("assaisonnement"));
+
+        const iDate = colDate >= 0 ? colDate : 0;
+        const iPeriode = colPeriode >= 0 ? colPeriode : 1;
+        const iHeure = colHeure >= 0 ? colHeure : 2;
+        const iMenu = colMenu >= 0 ? colMenu : 3;
+        const iQte = colQte >= 0 ? colQte : 4;
+        const iCuisson = colCuisson >= 0 ? colCuisson : 5;
+
         // Extraction des données (en sautant la ligne d'en-tête)
         const rows = data.slice(1);
 
@@ -273,12 +289,13 @@ function generateFoodDiaryDoc() {
         const dataByDate = {};
         rows.forEach(row => {
             let dateStr = 'Date inconnue';
-            if (row[0]) {
-                const dateObj = (row[0] instanceof Date) ? row[0] : new Date(row[0]);
+            const cellDate = row[iDate];
+            if (cellDate) {
+                const dateObj = (cellDate instanceof Date) ? cellDate : new Date(cellDate);
                 if (!isNaN(dateObj.getTime())) {
                     dateStr = Utilities.formatDate(dateObj, tz, "dd/MM/yyyy");
                 } else {
-                    dateStr = String(row[0]);
+                    dateStr = String(cellDate);
                 }
             }
             if (!dataByDate[dateStr]) dataByDate[dateStr] = [];
@@ -317,15 +334,17 @@ function generateFoodDiaryDoc() {
 
             // Tri des lignes selon l'ordre logique des repas
             const repasDuJour = dataByDate[date];
-            repasDuJour.sort((a, b) => ordreCategories.indexOf(a[1]) - ordreCategories.indexOf(b[1]));
+            repasDuJour.sort((a, b) => ordreCategories.indexOf(a[iPeriode]) - ordreCategories.indexOf(b[iPeriode]));
 
             repasDuJour.forEach(repas => {
-                const periodeLieu = String(repas[1] || '') + (repas[2] ? '\n(' + repas[2] + ')' : '');
+                const pValue = String(repas[iPeriode] || '');
+                const hValue = String(repas[iHeure] || '');
+                const periodeLieu = pValue + (hValue ? '\n(' + hValue + ')' : '');
                 cells.push([
                     periodeLieu,
-                    String(repas[3] || ''),
-                    String(repas[4] || ''),
-                    String(repas[5] || '')
+                    String(repas[iMenu] || ''),
+                    String(repas[iQte] || ''),
+                    String(repas[iCuisson] || '')
                 ]);
             });
 
