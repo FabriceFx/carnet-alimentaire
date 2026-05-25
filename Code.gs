@@ -212,7 +212,9 @@ function generateFoodDiaryDoc() {
         }
 
         // Création du document
-        doc = DocumentApp.create('Export Carnet Alimentaire - ' + new Date().toLocaleDateString());
+        const tz = Session.getScriptTimeZone();
+        const todayStr = Utilities.formatDate(new Date(), tz, "dd/MM/yyyy");
+        doc = DocumentApp.create('Export Carnet Alimentaire - ' + todayStr);
         const body = doc.getBody();
 
         body.appendParagraph('Carnet Alimentaire').setHeading(DocumentApp.ParagraphHeading.TITLE);
@@ -222,8 +224,20 @@ function generateFoodDiaryDoc() {
         if (profileData && (profileData.nom || profileData.prenom)) {
             let profileText = `Patient: ${profileData.prenom} ${profileData.nom}`;
             if (profileData.dateNaissance) {
-                const dob = new Date(profileData.dateNaissance);
-                profileText += `\nNé(e) le: ${dob.toLocaleDateString()}`;
+                let dobStr = '';
+                if (profileData.dateNaissance instanceof Date) {
+                    dobStr = Utilities.formatDate(profileData.dateNaissance, tz, "dd/MM/yyyy");
+                } else {
+                    const dobDate = new Date(profileData.dateNaissance);
+                    if (!isNaN(dobDate.getTime())) {
+                        dobStr = Utilities.formatDate(dobDate, tz, "dd/MM/yyyy");
+                    } else {
+                        dobStr = profileData.dateNaissance;
+                    }
+                }
+                if (dobStr) {
+                    profileText += `\nNé(e) le: ${dobStr}`;
+                }
             }
             if (profileData.sexe && profileData.sexe !== 'Non précisé') {
                 profileText += `\nSexe: ${profileData.sexe}`;
@@ -240,7 +254,15 @@ function generateFoodDiaryDoc() {
         // Regroupement par date
         const dataByDate = {};
         rows.forEach(row => {
-            const dateStr = row[0] ? new Date(row[0]).toLocaleDateString() : 'Date inconnue';
+            let dateStr = 'Date inconnue';
+            if (row[0]) {
+                const dateObj = (row[0] instanceof Date) ? row[0] : new Date(row[0]);
+                if (!isNaN(dateObj.getTime())) {
+                    dateStr = Utilities.formatDate(dateObj, tz, "dd/MM/yyyy");
+                } else {
+                    dateStr = String(row[0]);
+                }
+            }
             if (!dataByDate[dateStr]) dataByDate[dateStr] = [];
             dataByDate[dateStr].push(row);
         });
