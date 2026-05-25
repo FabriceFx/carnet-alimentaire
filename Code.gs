@@ -586,10 +586,13 @@ ${journalTexte}`;
     try {
         const response = UrlFetchApp.fetch(url, options);
         const json = JSON.parse(response.getContentText());
-        if (json.candidates && json.candidates[0].content.parts[0].text) {
+        if (json.candidates && json.candidates.length > 0 && json.candidates[0].content) {
             return json.candidates[0].content.parts[0].text.trim();
         }
-        return "Impossible de générer l'analyse pour cette journée.";
+        if (json.error) {
+            return "Erreur de l'API : " + json.error.message;
+        }
+        return "Impossible de générer l'analyse. Réponse de l'API : " + response.getContentText();
     } catch (e) {
         return "Erreur lors de l'analyse nutritionnelle : " + e.toString();
     }
