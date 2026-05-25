@@ -57,13 +57,57 @@
         </div>
 
         <div class="form-group">
-          <label for="quantite" class="label" data-i18n="lblQte">Quantités</label>
-          <input type="text" id="quantite" name="quantite" class="input">
+          <label class="label" data-i18n="lblQte">Quantités</label>
+          <div style="display: flex; gap: 10px;">
+            <input type="number" step="any" id="quantiteValeur" class="input" data-i18n="placeholderQte" style="flex: 1;">
+            <select id="quantiteUnite" class="select" style="flex: 1;">
+              <option value="" data-i18n="optNoUnit">(Aucune unité)</option>
+              <option value="g" data-i18n="optG">g (grammes)</option>
+              <option value="kg">kg</option>
+              <option value="ml">ml</option>
+              <option value="cl">cl</option>
+              <option value="L">L</option>
+              <option value="c.à.c">c.à.c</option>
+              <option value="c.à.s">c.à.s</option>
+              <option value="tasse">tasse</option>
+              <option value="bol">bol</option>
+              <option value="verre">verre</option>
+              <option value="part">part</option>
+              <option value="portion">portion</option>
+              <option value="tranche">tranche</option>
+              <option value="pièce">pièce</option>
+            </select>
+          </div>
         </div>
 
         <div class="form-group">
-          <label for="cuisson" class="label" data-i18n="lblCuisson">Cuisson / Assaisonnement</label>
-          <textarea id="cuisson" name="cuisson" class="input"></textarea>
+          <label class="label" data-i18n="lblCuisson">Cuisson / Assaisonnement</label>
+          <div style="display: flex; gap: 10px;">
+            <select id="cuissonList" class="select" style="flex: 1;">
+              <option value="" data-i18n="optCuissonEmpty">(Cuisson...)</option>
+              <option value="Cru" data-i18n="optCru">Cru</option>
+              <option value="Vapeur" data-i18n="optVapeur">Vapeur</option>
+              <option value="Bouilli / À l'eau" data-i18n="optBouilli">Bouilli / À l'eau</option>
+              <option value="Poêlé" data-i18n="optPoele">Poêlé</option>
+              <option value="Grillé" data-i18n="optGrille">Grillé</option>
+              <option value="Rôti / Au four" data-i18n="optRoti">Rôti / Au four</option>
+              <option value="Frit" data-i18n="optFrit">Frit</option>
+              <option value="Mijoté" data-i18n="optMijote">Mijoté</option>
+              <option value="Micro-ondes" data-i18n="optMicro">Micro-ondes</option>
+            </select>
+            <select id="assaisonnementList" class="select" style="flex: 1;">
+              <option value="" data-i18n="optAssaisonEmpty">(Assaisonnement...)</option>
+              <option value="Sans matière grasse" data-i18n="optSansMat">Sans matière grasse</option>
+              <option value="Huile d'olive" data-i18n="optHuileOlive">Huile d'olive</option>
+              <option value="Autre huile" data-i18n="optAutreHuile">Autre huile</option>
+              <option value="Beurre" data-i18n="optBeurre">Beurre</option>
+              <option value="Crème fraîche" data-i18n="optCreme">Crème fraîche</option>
+              <option value="Sauce tomate" data-i18n="optSauceTomate">Sauce tomate</option>
+              <option value="Vinaigrette" data-i18n="optVinaigrette">Vinaigrette</option>
+              <option value="Mayonnaise" data-i18n="optMayo">Mayonnaise</option>
+              <option value="Épices / Herbes" data-i18n="optEpices">Épices / Herbes</option>
+            </select>
+          </div>
         </div>
 
         <button type="button" class="btn btn-primary" id="btnSubmit" onclick="saveData()">
@@ -129,13 +173,24 @@
       btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg> <span>${getTxt('btnSaving')}</span>`;
       btn.disabled = true;
 
+      const qteVal = document.getElementById('quantiteValeur').value;
+      const qteUnite = document.getElementById('quantiteUnite').value;
+      const quantitesCombine = qteVal ? (qteVal + " " + qteUnite).trim() : "";
+
+      const cVal = document.getElementById('cuissonList').value;
+      const aVal = document.getElementById('assaisonnementList').value;
+      let cuissonArr = [];
+      if (cVal) cuissonArr.push(cVal);
+      if (aVal) cuissonArr.push(aVal);
+      const cuissonCombine = cuissonArr.join(' / ');
+
       const formData = {
         date: form.date.value,
         periode: form.periode.value,
         heure: form.heure.value,
         menu: form.menu.value,
-        quantite: form.quantite.value,
-        cuisson: form.cuisson.value
+        quantite: quantitesCombine,
+        cuisson: cuissonCombine
       };
 
       google.script.run
@@ -147,8 +202,10 @@
           
           // Reset fields but keep date, periode and time
           form.menu.value = '';
-          form.quantite.value = '';
-          form.cuisson.value = '';
+          document.getElementById('quantiteValeur').value = '';
+          document.getElementById('quantiteUnite').value = '';
+          document.getElementById('cuissonList').value = '';
+          document.getElementById('assaisonnementList').value = '';
         })
         .withFailureHandler((error) => {
           hideOverlay();
