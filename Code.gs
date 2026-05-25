@@ -586,8 +586,16 @@ ${journalTexte}`;
     try {
         const response = UrlFetchApp.fetch(url, options);
         const json = JSON.parse(response.getContentText());
-        if (json.candidates && json.candidates.length > 0 && json.candidates[0].content) {
-            return json.candidates[0].content.parts[0].text.trim();
+        if (json.candidates && json.candidates.length > 0) {
+            const candidate = json.candidates[0];
+            let text = "";
+            if (candidate.content && candidate.content.parts && candidate.content.parts.length > 0) {
+                text = candidate.content.parts[0].text.trim();
+            }
+            if (candidate.finishReason && candidate.finishReason !== "STOP") {
+                text += `\n[Info technique: Génération interrompue. Raison = ${candidate.finishReason}]`;
+            }
+            if (text) return text;
         }
         if (json.error) {
             return "Erreur de l'API : " + json.error.message;
