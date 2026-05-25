@@ -22,7 +22,7 @@ function onOpen() {
         .addSeparator()
         .addItem('Paramètres (clé API)', 'showSettings')
         .addToUi();
-        
+
     checkInputSheet();
     cleanEmptySheets();
 }
@@ -34,29 +34,29 @@ function checkInputSheet() {
     try {
         const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
         const sheets = spreadsheet.getSheets();
-        
+
         let hasInputSheet = false;
         for (let i = 0; i < sheets.length; i++) {
             const sheet = sheets[i];
             // On s'assure que la feuille a au moins 4 colonnes avant de lire
             if (sheet.getMaxColumns() >= 4) {
                 const firstRow = sheet.getRange(1, 1, 1, 4).getValues()[0];
-                if (String(firstRow[0]).toLowerCase() === "date" && 
+                if (String(firstRow[0]).toLowerCase() === "date" &&
                     String(firstRow[3]).toLowerCase() === "menu précis") {
                     hasInputSheet = true;
                     break;
                 }
             }
         }
-        
+
         if (!hasInputSheet) {
             const ui = SpreadsheetApp.getUi();
             const response = ui.alert(
-                'Carnet Alimentaire', 
-                "Il semble qu'aucune feuille de saisie ne soit présente.\nVoulez-vous créer la feuille 'Carnet' avec les bonnes colonnes ?", 
+                'Carnet Alimentaire',
+                "Il semble qu'aucune feuille de saisie ne soit présente.\nVoulez-vous créer la feuille 'Carnet' avec les bonnes colonnes ?",
                 ui.ButtonSet.YES_NO
             );
-            
+
             if (response == ui.Button.YES) {
                 let newSheet = spreadsheet.getSheetByName("Carnet");
                 if (!newSheet) {
@@ -80,13 +80,13 @@ function checkInputSheet() {
 function getFrequentMenus() {
     const sheet = getInputSheet();
     if (!sheet) return [];
-    
+
     const lastRow = sheet.getLastRow();
     if (lastRow < 2) return [];
 
     // Colonne D (index 4) : "Menu précis"
     const values = sheet.getRange(2, 4, lastRow - 1, 1).getValues().flat();
-    
+
     // Filtrer les doublons et les valeurs vides
     return [...new Set(values)].filter(String).slice(0, 50); // Top 50 pour plus de choix
 }
@@ -167,7 +167,7 @@ function saveApiKey(key) {
 function getProfileData() {
     const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Profil");
     if (!sheet || sheet.getLastRow() < 2) return null;
-    
+
     const data = sheet.getRange(2, 1, 1, 5).getValues()[0];
     if (!data || data.length === 0) return null;
 
@@ -181,7 +181,7 @@ function getProfileData() {
                 const dd = String(date.getDate()).padStart(2, '0');
                 dob = `${yyyy}-${mm}-${dd}`;
             }
-        } catch(e) {}
+        } catch (e) { }
     }
 
     return {
@@ -203,14 +203,14 @@ function saveProfileData(profileData) {
     try {
         const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
         let sheet = spreadsheet.getSheetByName("Profil");
-        
+
         if (!sheet) {
             sheet = spreadsheet.insertSheet("Profil");
             const headers = ["Nom", "Prénom", "Date de naissance", "Sexe", "Poids de départ (kg)"];
             sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
             sheet.getRange(1, 1, 1, headers.length).setFontWeight("bold").setBackground("#f3f3f3");
         }
-        
+
         const rowData = [
             profileData.nom,
             profileData.prenom,
@@ -218,14 +218,14 @@ function saveProfileData(profileData) {
             profileData.sexe,
             profileData.poids
         ];
-        
+
         sheet.getRange(2, 1, 1, 5).setValues([rowData]);
-        
+
         // S'assurer que la feuille Profil reste masquée
         if (!sheet.isSheetHidden()) {
             sheet.hideSheet();
         }
-        
+
         return { success: true, message: "Profil enregistré avec succès !" };
     } catch (error) {
         return { success: false, message: "Erreur : " + error.toString() };
@@ -254,7 +254,7 @@ function saveMealData(formData) {
         if (!sheet) {
             return { success: false, message: "Erreur : Impossible de trouver la feuille de saisie." };
         }
-        
+
         sheet.appendRow([
             formData.date,
             formData.categorie,
@@ -274,23 +274,23 @@ function saveMealData(formData) {
  */
 function getInputSheet() {
     const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-    
+
     // Essayer de trouver par nom en priorité
     let sheet = spreadsheet.getSheetByName("Carnet");
     if (sheet) return sheet;
-    
+
     // Sinon, on cherche une feuille qui a les bons en-têtes
     const sheets = spreadsheet.getSheets();
     for (let i = 0; i < sheets.length; i++) {
         if (sheets[i].getMaxColumns() >= 4) {
             const firstRow = sheets[i].getRange(1, 1, 1, 4).getValues()[0];
-            if (String(firstRow[0]).toLowerCase() === "date" && 
+            if (String(firstRow[0]).toLowerCase() === "date" &&
                 String(firstRow[3]).toLowerCase() === "menu précis") {
                 return sheets[i];
             }
         }
     }
-    
+
     return null;
 }
 
@@ -301,7 +301,7 @@ function generateFoodDiaryDoc() {
     let doc;
     try {
         const sheet = getInputSheet();
-        
+
         if (!sheet) {
             SpreadsheetApp.getUi().alert("Erreur : Feuille de carnet introuvable.");
             return;
@@ -317,10 +317,17 @@ function generateFoodDiaryDoc() {
         // Création du document
         const tz = Session.getScriptTimeZone();
         const todayStr = Utilities.formatDate(new Date(), tz, "dd/MM/yyyy");
-        doc = DocumentApp.create('Export Carnet Alimentaire - ' + todayStr);
+        doc = DocumentApp.create('Export carnet alimentaire - ' + todayStr);
         const body = doc.getBody();
 
-        body.appendParagraph('Carnet Alimentaire').setHeading(DocumentApp.ParagraphHeading.TITLE);
+        const titlePara = body.appendParagraph('Carnet alimentaire');
+        titlePara.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+        titlePara.setAttributes({
+            [DocumentApp.Attribute.FONT_FAMILY]: 'Arial',
+            [DocumentApp.Attribute.FONT_SIZE]: 24,
+            [DocumentApp.Attribute.BOLD]: true,
+            [DocumentApp.Attribute.FOREGROUND_COLOR]: '#0b57d0'
+        });
 
         // Ajout des infos du profil si elles existent
         const profileData = getProfileData();
@@ -344,7 +351,15 @@ function generateFoodDiaryDoc() {
             if (profileData.poids) {
                 profileText += `\nPoids de départ: ${profileData.poids} kg`;
             }
-            body.appendParagraph(profileText).setHeading(DocumentApp.ParagraphHeading.SUBTITLE);
+            const subtitlePara = body.appendParagraph(profileText);
+            subtitlePara.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+            subtitlePara.setAttributes({
+                [DocumentApp.Attribute.FONT_FAMILY]: 'Arial',
+                [DocumentApp.Attribute.FONT_SIZE]: 11,
+                [DocumentApp.Attribute.ITALIC]: true,
+                [DocumentApp.Attribute.FOREGROUND_COLOR]: '#5f6368'
+            });
+            subtitlePara.setSpacingAfter(20);
         }
 
         // Extraction de l'en-tête et définition dynamique des index de colonnes
@@ -400,6 +415,7 @@ function generateFoodDiaryDoc() {
         styleCell[DocumentApp.Attribute.PADDING_RIGHT] = 8;
 
         const styleHeader = Object.assign({}, styleCell);
+        styleHeader[DocumentApp.Attribute.FONT_FAMILY] = 'Arial';
         styleHeader[DocumentApp.Attribute.BACKGROUND_COLOR] = '#F3F4F6';
         styleHeader[DocumentApp.Attribute.BOLD] = true;
         styleHeader[DocumentApp.Attribute.FONT_SIZE] = 11;
@@ -480,7 +496,7 @@ function generateFoodDiaryDoc() {
         }
 
         doc.saveAndClose();
-        
+
         const docUrl = doc.getUrl();
         const ui = SpreadsheetApp.getUi();
         const htmlOutput = HtmlService.createHtmlOutput(`
@@ -490,10 +506,10 @@ function generateFoodDiaryDoc() {
             </div>
         `).setWidth(400).setHeight(150);
         ui.showModalDialog(htmlOutput, 'Document généré avec succès !');
-        
+
     } catch (e) {
         if (doc) {
-            try { doc.saveAndClose(); } catch(err) {}
+            try { doc.saveAndClose(); } catch (err) { }
         }
         SpreadsheetApp.getUi().alert("Erreur lors de la génération :\n" + e.message);
     }
@@ -505,12 +521,12 @@ function generateFoodDiaryDoc() {
 function createFilteredSheet() {
     const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
     const sourceSheet = getInputSheet();
-    
+
     if (!sourceSheet) {
         SpreadsheetApp.getUi().alert("Erreur : Feuille de carnet introuvable.");
         return;
     }
-    
+
     const data = sourceSheet.getDataRange().getValues();
 
     if (data.length <= 1) {
@@ -523,7 +539,7 @@ function createFilteredSheet() {
     const headerRow = header.map(h => String(h).toLowerCase().trim());
     const colMenu = headerRow.findIndex(h => h.includes("menu"));
     const iMenu = colMenu >= 0 ? colMenu : 3;
-    
+
     // On filtre les lignes pour ne garder que celles ayant un menu renseigné
     // (Considérant qu'une saisie "absente" est une ligne sans repas ou notée comme telle)
     const filteredRows = data.slice(1).filter(row => {
@@ -538,7 +554,7 @@ function createFilteredSheet() {
 
     const newSheetName = 'Saisies filtrées - ' + new Date().toLocaleDateString();
     let newSheet = spreadsheet.getSheetByName(newSheetName);
-    
+
     if (newSheet) {
         newSheet.clear();
     } else {
@@ -548,7 +564,7 @@ function createFilteredSheet() {
     // On réinsère l'en-tête et les lignes filtrées
     const outputData = [header].concat(filteredRows);
     newSheet.getRange(1, 1, outputData.length, outputData[0].length).setValues(outputData);
-    
+
     SpreadsheetApp.getUi().alert("Feuille créée avec succès !");
 }
 
@@ -560,18 +576,18 @@ function cleanEmptySheets() {
     try {
         const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
         const sheets = spreadsheet.getSheets();
-        
+
         let sheetCount = sheets.length;
-        
+
         for (let i = sheets.length - 1; i >= 0; i--) {
             if (sheetCount <= 1) break; // Ne jamais supprimer la dernière feuille
-            
+
             const sheet = sheets[i];
             const name = sheet.getName();
-            
+
             // On protège les feuilles principales même si elles sont temporairement vides
             if (name === "Profil" || name === "Carnet") continue;
-            
+
             // Si la feuille est totalement vide
             if (sheet.getLastRow() === 0) {
                 spreadsheet.deleteSheet(sheet);
@@ -594,7 +610,7 @@ function analyzeDayNutrition(repasObj, profileData) {
     if (!apiKey) return "Avis diététique indisponible (Clé API manquante dans les propriétés du script).";
 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`;
-  
+
     // Formatage textuel des repas pour le prompt (en utilisant l'objet structuré pour garantir la correspondance des colonnes)
     let journalTexte = repasObj.map(r => {
         return `- ${r.periode} (${r.heure || 'Heure non précisée'}): ${r.menu} | Qté: ${r.quantite || 'N/A'} | Cuisson/Assais: ${r.cuisson || 'N/A'}`;

@@ -13,7 +13,7 @@
  * Objet de configuration central du projet.
  */
 const CONFIG = {
-  PROJECT_NAME: "Carnet Alimentaire",
+  PROJECT_NAME: "Carnet alimentaire",
   VERSION: "1.0.0",
   DEBUG_MODE: true,
   COLORS: {
