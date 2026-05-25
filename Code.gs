@@ -763,9 +763,10 @@ function sendDailyAdviceEmail() {
         ? `Profil du patient : ${profileData.prenom} ${profileData.nom}, Sexe: ${profileData.sexe}, Poids: ${profileData.poids}kg.`
         : "";
 
-    // Gestion de la langue (fr ou en)
-    const userLocale = Session.getActiveUserLocale() || 'fr';
-    const isFr = userLocale.startsWith('fr');
+    // Gestion de la langue (fr ou en) basée sur les paramètres du tableur (plus fiable pour les déclencheurs)
+    const activeSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    const userLocale = activeSpreadsheet ? activeSpreadsheet.getSpreadsheetLocale() : 'fr';
+    const isFr = userLocale.toLowerCase().startsWith('fr');
 
     // Préparation du prompt Gemini
     const promptLang = isFr ? "Réponds impérativement en français." : "You must reply in English.";
