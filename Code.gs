@@ -61,6 +61,23 @@ function checkInputSheet() {
 }
 
 /**
+ * Récupère la liste des menus précédents pour l'auto-complétion.
+ */
+function getFrequentMenus() {
+    const sheet = getInputSheet();
+    if (!sheet) return [];
+    
+    const lastRow = sheet.getLastRow();
+    if (lastRow < 2) return [];
+
+    // Colonne D (index 4) : "Menu précis"
+    const values = sheet.getRange(2, 4, lastRow - 1, 1).getValues().flat();
+    
+    // Filtrer les doublons et les valeurs vides
+    return [...new Set(values)].filter(String).slice(0, 50); // Top 50 pour plus de choix
+}
+
+/**
  * Affiche la barre latérale HTML.
  */
 function showSidebar() {

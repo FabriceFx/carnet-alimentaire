@@ -91,7 +91,8 @@
 
         <div class="block form-group">
             <label for="menu">Menu précis</label>
-            <textarea id="menu" placeholder="ex: Poulet ratatouille, Salade de fruits" style="width: 100%;"></textarea>
+            <input type="text" id="menu" list="menu-suggestions" placeholder="ex: Poulet ratatouille..." style="width: 100%;">
+            <datalist id="menu-suggestions"></datalist>
         </div>
 
         <div class="block form-group">
@@ -154,8 +155,24 @@
     </div>
 
     <script>
-        // Définir par défaut la date du jour
-        document.getElementById('date').valueAsDate = new Date();
+        document.addEventListener("DOMContentLoaded", function() {
+            // Définir par défaut la date du jour
+            document.getElementById('date').valueAsDate = new Date();
+
+            // Charger l'auto-complétion des menus
+            google.script.run
+                .withSuccessHandler(function(menus) {
+                    if (menus && menus.length > 0) {
+                        const datalist = document.getElementById('menu-suggestions');
+                        menus.forEach(function(menu) {
+                            const option = document.createElement('option');
+                            option.value = menu;
+                            datalist.appendChild(option);
+                        });
+                    }
+                })
+                .getFrequentMenus();
+        });
 
         function submitForm() {
             const statusDiv = document.getElementById('status');
