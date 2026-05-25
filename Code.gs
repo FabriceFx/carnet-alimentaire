@@ -374,6 +374,33 @@ function generateFoodDiaryDoc() {
                 }
             }
 
+            // 1. Préparation des données pour l'analyse avec index dynamiques
+            const repasPourAnalyse = repasDuJour.map(repas => ({
+                periode: repas[iPeriode],
+                heure: repas[iHeure],
+                menu: repas[iMenu],
+                quantite: repas[iQte],
+                cuisson: repas[iCuisson]
+            }));
+
+            // Appel de l'analyse sémantique
+            const analyseDietetique = analyzeDayNutrition(repasPourAnalyse, profileData);
+
+            // 2. Création du bloc de texte stylisé
+            const pAnalyse = body.appendParagraph('');
+            pAnalyse.setSpacingBefore(8).setSpacingAfter(16);
+
+            // Style de l'encadré de conseils
+            const styleConseil = {};
+            styleConseil[DocumentApp.Attribute.BACKGROUND_COLOR] = '#EFF6FF';
+            styleConseil[DocumentApp.Attribute.FONT_FAMILY] = 'Arial';
+            styleConseil[DocumentApp.Attribute.FONT_SIZE] = 9.5;
+            styleConseil[DocumentApp.Attribute.FOREGROUND_COLOR] = '#1E40AF';
+
+            // Ajout d'un titre interne à l'encadré
+            const textObj = pAnalyse.appendText("💡 Analyse & Conseils Diététiques :\n" + analyseDietetique);
+            textObj.setAttributes(styleConseil);
+
             body.appendParagraph(''); // Espace entre les journées
         }
 
@@ -472,5 +499,62 @@ function cleanEmptySheets() {
         }
     } catch (e) {
         // Ignorer les erreurs mineures de nettoyage
+    }
+}
+
+/**
+ * Appelle l'API Gemini pour générer une analyse diététique basée sur les repas de la journée.
+ * @param {Array} repasObj Lignes de données structurées de la journée
+ * @param {Object} profileData Métadonnées de l'utilisateur (optionnel)
+ * @return {String} L'analyse textuelle formatée
+ */
+function analyzeDayNutrition(repasObj, profileData) {
+    // Remplacer par votre clé API stockée de préférence dans les propriétés du script
+    const apiKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
+    if (!apiKey) return "Avis diététique indisponible (Clé API manquante dans les propriétés du script).";
+
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  
+    // Formatage textuel des repas pour le prompt (en utilisant l'objet structuré pour garantir la correspondance des colonnes)
+    let journalTexte = repasObj.map(r => {
+        return `- ${r.periode} (${r.heure || 'Heure non précisée'}): ${r.menu} | Qté: ${r.quantite || 'N/A'} | Cuisson/Assais: ${r.cuisson || 'N/A'}`;
+    }).join('\n');
+
+    let contexteProfil = profileData ? `Le profil de la personne est : Sexe ${profileData.sexe}, Poids de départ ${profileData.poids} kg.` : '';
+
+    const prompt = `En tant qu'expert en diététique et nutrition, analyse le journal alimentaire suivant pour une seule journée. 
+${contexteProfil}
+  
+Fournis une analyse constructive, concise (maximum 150 mots) et structurée selon ces trois axes cardinaux :
+1. Points forts (ex: bonne hydratation, présence de légumes, rythme respecté).
+2. Vigilances (ex: manque de protéines le midi, dîner trop lourd ou tardif, produits industriels).
+3. Conseil concret (une action simple et mesurable pour le lendemain).
+  
+Sois factuel, professionnel et encourageant. Ne compte pas les calories, reste sur l'équilibre qualitatif.
+  
+Voici le journal de la journée :
+${journalTexte}`;
+
+    const payload = {
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { maxOutputTokens: 300, temperature: 0.2 }
+    };
+
+    const options = {
+        method: 'post',
+        contentType: 'application/json',
+        payload: JSON.stringify(payload),
+        muteHttpExceptions: true
+    };
+
+    try {
+        const response = UrlFetchApp.fetch(url, options);
+        const json = JSON.parse(response.getContentText());
+        if (json.candidates && json.candidates[0].content.parts[0].text) {
+            return json.candidates[0].content.parts[0].text.trim();
+        }
+        return "Impossible de générer l'analyse pour cette journée.";
+    } catch (e) {
+        return "Erreur lors de l'analyse nutritionnelle : " + e.toString();
     }
 }
