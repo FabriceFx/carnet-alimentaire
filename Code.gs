@@ -14,13 +14,13 @@
  */
 function onOpen() {
     SpreadsheetApp.getUi()
-        .createMenu('Carnet Alimentaire')
+        .createMenu('Carnet alimentaire')
         .addItem('Ouvrir la saisie', 'showSidebar')
-        .addItem('Mon Profil', 'showProfile')
+        .addItem('Mon profil', 'showProfile')
         .addItem('Générer le Google Doc', 'generateFoodDiaryDoc')
         .addItem('Créer feuille filtrée (saisies)', 'createFilteredSheet')
         .addSeparator()
-        .addItem('Paramètres (Clé API)', 'showSettings')
+        .addItem('Paramètres (clé API)', 'showSettings')
         .addToUi();
         
     checkInputSheet();
@@ -108,10 +108,10 @@ function showProfile() {
     const template = HtmlService.createTemplateFromFile('Profil');
     template.locale = Session.getActiveUserLocale();
     const html = template.evaluate()
-        .setTitle('Profil Utilisateur')
+        .setTitle('Profil utilisateur')
         .setWidth(400)
         .setHeight(500);
-    SpreadsheetApp.getUi().showModalDialog(html, 'Profil Utilisateur');
+    SpreadsheetApp.getUi().showModalDialog(html, 'Profil utilisateur');
 }
 
 /**
@@ -121,10 +121,10 @@ function showSettings() {
     const template = HtmlService.createTemplateFromFile('Settings');
     template.locale = Session.getActiveUserLocale();
     const html = template.evaluate()
-        .setTitle('Paramètres - Intelligence Artificielle')
+        .setTitle('Paramètres - Intelligence artificielle')
         .setWidth(450)
         .setHeight(350);
-    SpreadsheetApp.getUi().showModalDialog(html, 'Paramètres - Intelligence Artificielle');
+    SpreadsheetApp.getUi().showModalDialog(html, 'Paramètres - Intelligence artificielle');
 }
 
 /**
