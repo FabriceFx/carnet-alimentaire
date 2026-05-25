@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FF Labs — Carnet alimentaire</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Open+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0b57d0;
+            --primary-hover: #0842a0;
+            --secondary: #444746;
+            --bg-app: #f3f6fc;
+            --bg-card: #ffffff;
+            --text-main: #1f1f1f;
+            --text-muted: #444746;
+            --border-light: #e3e3e3;
+            --border: #c7c7c7;
+            --radius-lg: 16px;
+            --radius-md: 8px;
+            --radius-sm: 4px;
+            --radius-pill: 100px;
+            --transition: all 0.2s ease-in-out;
+            --max-width: 900px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Open Sans', 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-app);
+            color: var(--text-main);
+            font-size: 14px;
+            line-height: 1.6;
+            padding: 0;
+            margin: 0;
+        }
+
+        .navbar {
+            background-color: var(--bg-card);
+            border-bottom: 1px solid var(--border-light);
+            padding: 16px 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar-container {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .container {
+            max-width: var(--max-width);
+            margin: 40px auto;
+            padding: 0 24px;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 40px 0 60px 0;
+        }
+
+        .badge-container {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 16px;
+            border-radius: var(--radius-pill);
+            font-size: 12px;
+            font-weight: 600;
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+        }
+
+        .badge-primary {
+            background-color: #e8f0fe;
+            color: var(--primary);
+            border-color: #d2e3fc;
+        }
+
+        .badge-success {
+            background-color: #e6f4ea;
+            color: #137333;
+            border-color: #ceead6;
+        }
+
+        h1 {
+            font-size: 36px;
+            font-weight: 600;
+            color: var(--text-main);
+            letter-spacing: -0.75px;
+            margin-bottom: 16px;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: var(--text-muted);
+            max-width: 700px;
+            margin: 0 auto 32px auto;
+            font-weight: 400;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            margin-bottom: 24px;
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            border-color: var(--border);
+        }
+
+        h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        h2 svg {
+            color: var(--primary);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 16px;
+        }
+
+        .grid-item {
+            background: var(--bg-app);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            border: 1px solid var(--border-light);
+        }
+
+        .grid-item-title {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        .code-window {
+            background: #1e1e1e;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            margin-top: 20px;
+            border: 1px solid #333;
+        }
+
+        .code-header {
+            background: #252526;
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid #333;
+        }
+
+        .code-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .code-title {
+            color: #969696;
+            font-size: 12px;
+            font-family: monospace;
+            margin-left: 4px;
+        }
+
+        .code-block {
+            color: #d4d4d4;
+            padding: 20px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            white-space: pre;
+        }
+
+        .actions {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 36px;
+            font-weight: 600;
+            font-size: 14px;
+            text-decoration: none;
+            transition: var(--transition);
+            border-radius: var(--radius-pill);
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            box-shadow: 0 4px 12px rgba(11, 87, 208, 0.25);
+        }
+
+        footer {
+            background: var(--bg-card);
+            border-top: 1px solid var(--border-light);
+            padding: 32px 24px;
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 80px;
+        }
+
+        .footer-container {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .footer-meta {
+            display: flex;
+            gap: 24px;
+            font-size: 12px;
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                </svg>
+                <span>⚡ FF Labs</span>
+            </div>
+            <div class="footer-links">
+                <a href="https://github.com/FabriceFx/carnet-alimentaire" target="_blank">Dépôt GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header class="hero">
+            <div class="badge-container">
+                <div class="badge badge-primary">Google Apps Script</div>
+                <div class="badge badge-success">v1.0.0</div>
+                <div class="badge">Architecture moderne</div>
+            </div>
+            <h1>Carnet alimentaire</h1>
+            <p class="subtitle">Une architecture industrielle et robuste pour Google Workspace, optimisée pour le
+                traitement de données de masse et connectée à l'intelligence artificielle sémantique.</p>
+            <div class="actions">
+                <a href="https://github.com/FabriceFx/carnet-alimentaire" class="btn btn-primary" target="_blank">
+                    Découvrir sur GitHub
+                </a>
+            </div>
+        </header>
+
+        <main>
+            <div class="card">
+                <h2>Architecture et modularité</h2>
+                <p>Le projet implémente une séparation stricte des concepts pour offrir une base de code propre, lisible
+                    et parfaitement maintenable dans le temps.</p>
+                <div class="grid">
+                    <div class="grid-item">
+                        <div class="grid-item-title">Code.gs</div>
+                        <p style="font-size: 13px; margin: 0;">Logique métier principale, initialisation des menus
+                            Workspace et points d'entrée des boîtes de dialogue et barres latérales.</p>
+                    </div>
+                    <div class="grid-item">
+                        <div class="grid-item-title">Config.gs</div>
+                        <p style="font-size: 13px; margin: 0;">Centralisation des constantes, typages, configurations de
+                            variables d'environnement et de journalisation des événements.</p>
+                    </div>
+                    <div class="grid-item">
+                        <div class="grid-item-title">Utils.gs</div>
+                        <p style="font-size: 13px; margin: 0;">Helpers serveurs et fonctions utilitaires d'inclusion
+                            dynamique des fichiers pour isoler les scripts client.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Garanties de performance</h2>
+                <p>Conformément aux exigences de développement de niveau production, l'application élimine tout goulot
+                    d'étranglement lié aux appels réseau Google Workspace :</p>
+                <ul style="margin-left: 20px; margin-bottom: 16px; color: var(--text-muted);">
+                    <li style="margin-bottom: 8px;"><strong>Traitement par lots obligatoire :</strong> Exclusion totale
+                        des requêtes atomiques de type <code>getValue()</code> ou <code>setValue()</code> au sein des
+                        boucles.</li>
+                    <li style="margin-bottom: 8px;"><strong>Consommation mémoire optimisée :</strong> Structuration des
+                        données à l'aide de matrices d'objets JavaScript pour accélérer le tri et le filtrage en mémoire
+                        vive avant persistance.</li>
+                    <li style="margin-bottom: 8px;"><strong>Intégration d'API sémantique :</strong> Payload structuré et
+                        nettoyé transmis à l'API Gemini pour garantir des réponses de qualité sous un format condensé et
+                        constructif.</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2>Aperçu d'un code source propre</h2>
+                <p>Extrait de la fonction d'analyse et de tri chronologique des repas de la journée avant communication
+                    asynchrone avec l'API externe :</p>
+
+                <div class="code-window">
+                    <div class="code-header">
+                        <span class="code-dot" style="background: #ff5f56;"></span>
+                        <span class="code-dot" style="background: #ffbd2e;"></span>
+                        <span class="code-dot" style="background: #27c93f;"></span>
+                        <span class="code-title">Code.gs</span>
+                    </div>
+                    <div class="code-block">repasDuJour.sort((a, b) =&gt; ordreCategories.indexOf(a[iPeriode]) -
+                        ordreCategories.indexOf(b[iPeriode]));
+
+                        const repasPourAnalyse = repasDuJour.map(repas =&gt; ({
+                        periode: repas[iPeriode],
+                        heure: repas[iHeure],
+                        menu: repas[iMenu],
+                        quantite: repas[iQte],
+                        cuisson: repas[iCuisson]
+                        }));</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <div class="footer-container">
+            <div><strong>⚡ FF Labs</strong> &nbsp;|&nbsp; <a href="https://faucheux.bzh" target="_blank">&lt;&gt; par
+                    Fabrice Faucheux</a></div>
+            <div class="footer-meta">
+                <span>Licence : MIT</span>
+                <span>Version : 1.0.0</span>
+                <span>Aide : <a href="https://github.com/FabriceFx/carnet-alimentaire" target="_blank">Dépôt
+                        carnet-alimentaire</a></span>
+            </div>
+        </div>
+    </footer>
+
+</body>
+
+</html>

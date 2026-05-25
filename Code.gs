@@ -18,6 +18,7 @@ function onOpen() {
         .addItem('Ouvrir la saisie', 'showSidebar')
         .addItem('Mon profil', 'showProfile')
         .addItem('Générer le Google Doc', 'generateFoodDiaryDoc')
+        .addItem('Envoyer bilan au médecin (PDF)', 'sendFoodDiaryToPro')
         .addItem('Créer feuille filtrée (saisies)', 'createFilteredSheet')
         .addSeparator()
         .addItem("Activer/Désactiver l'email du soir", 'toggleDailyEmail')
@@ -185,11 +186,12 @@ function saveApiKey(key) {
 
 /**
  * @typedef {Object} ProfileData
- * @property {string} nom - Le nom de l'utilisateur
- * @property {string} prenom - Le prénom de l'utilisateur
- * @property {string} dateNaissance - La date de naissance au format YYYY-MM-DD
- * @property {string} sexe - Le sexe de l'utilisateur (Femme, Homme, Autre)
- * @property {number|string} poids - Le poids de départ en kg
+ * @property {string} nom - Nom de famille
+ * @property {string} prenom - Prénom
+ * @property {string} dateNaissance - Date de naissance (format string)
+ * @property {string} sexe - Sexe ("Homme", "Femme", "Autre")
+ * @property {string|number} poids - Poids de départ en kg
+ * @property {string} [emailPro] - E-mail du professionnel de santé
  */
 
 /**
@@ -347,11 +349,36 @@ function generateFoodDiaryDoc() {
             return;
         }
 
-        // Création du document
-        const tz = Session.getScriptTimeZone();
-        const todayStr = Utilities.formatDate(new Date(), tz, "dd/MM/yyyy");
-        doc = DocumentApp.create('Export carnet alimentaire - ' + todayStr);
-        const body = doc.getBody();
+        doc = createFoodDiaryDocFile(data, tz);
+
+        const docUrl = doc.getUrl();
+        const ui = SpreadsheetApp.getUi();
+        const htmlOutput = HtmlService.createHtmlOutput(`
+            <div style="font-family: 'Inter', sans-serif; text-align: center; padding: 15px;">
+                <p style="font-size: 14px; margin-bottom: 20px;">Votre carnet alimentaire a été généré sous forme de document Google Docs avec succès.</p>
+                <a href="${docUrl}" target="_blank" style="background-color: #0b57d0; color: white; padding: 10px 20px; text-decoration: none; border-radius: 20px; font-size: 14px; font-weight: 500; display: inline-block;">Ouvrir le document</a>
+            </div>
+        `).setWidth(400).setHeight(150);
+        ui.showModalDialog(htmlOutput, 'Document généré avec succès !');
+
+    } catch (e) {
+        if (doc) {
+            try { doc.setTrashed(true); } catch (err) { }
+        }
+        SpreadsheetApp.getUi().alert("Erreur lors de la génération :\n" + e.message);
+    }
+}
+
+/**
+ * Logique centrale de création du document Google Docs.
+ * @param {Array} data Données brutes de la feuille
+ * @param {string} tz Fuseau horaire
+ * @return {GoogleAppsScript.Document.Document} Le document généré
+ */
+function createFoodDiaryDocFile(data, tz) {
+    const todayStr = Utilities.formatDate(new Date(), tz, "dd/MM/yyyy");
+    const doc = DocumentApp.create('Export carnet alimentaire - ' + todayStr);
+    const body = doc.getBody();
 
         const titlePara = body.appendParagraph('Carnet alimentaire');
         titlePara.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
@@ -529,22 +556,65 @@ function generateFoodDiaryDoc() {
         }
 
         doc.saveAndClose();
+        return doc;
+}
 
-        const docUrl = doc.getUrl();
-        const ui = SpreadsheetApp.getUi();
-        const htmlOutput = HtmlService.createHtmlOutput(`
-            <div style="font-family: 'Inter', sans-serif; text-align: center; padding: 15px;">
-                <p style="font-size: 14px; margin-bottom: 20px;">Votre carnet alimentaire a été généré sous forme de document Google Docs avec succès.</p>
-                <a href="${docUrl}" target="_blank" style="background-color: #0b57d0; color: white; padding: 10px 20px; text-decoration: none; border-radius: 20px; font-size: 14px; font-weight: 500; display: inline-block;">Ouvrir le document</a>
-            </div>
-        `).setWidth(400).setHeight(150);
-        ui.showModalDialog(htmlOutput, 'Document généré avec succès !');
+/**
+ * Envoie le carnet au format PDF par e-mail au professionnel de santé.
+ */
+function sendFoodDiaryToPro() {
+    const profileData = getProfileData() || {};
+    const ui = SpreadsheetApp.getUi();
+
+    if (!profileData.emailPro) {
+        ui.alert("Information manquante", "Vous n'avez pas renseigné l'e-mail de votre professionnel de santé.\nVeuillez ouvrir 'Mon profil' pour l'ajouter.", ui.ButtonSet.OK);
+        return;
+    }
+
+    const sheet = getInputSheet();
+    if (!sheet) {
+        ui.alert("Erreur : Feuille de carnet introuvable.");
+        return;
+    }
+
+    const data = sheet.getDataRange().getValues();
+    if (data.length <= 1) {
+        ui.alert("La feuille de calcul ne contient aucune donnée à exporter.");
+        return;
+    }
+
+    ui.alert("Génération en cours...", "Veuillez patienter pendant que l'IA génère l'analyse et que le PDF se prépare. Cela peut prendre quelques secondes. Cliquez sur OK pour lancer l'envoi.", ui.ButtonSet.OK);
+
+    let doc;
+    try {
+        const tz = Session.getScriptTimeZone();
+        doc = createFoodDiaryDocFile(data, tz);
+        
+        const pdfBlob = doc.getAs(MimeType.PDF);
+        pdfBlob.setName("Carnet Alimentaire - " + (profileData.nom || "Patient") + ".pdf");
+
+        const subject = "Carnet Alimentaire de " + (profileData.prenom || "") + " " + (profileData.nom || "");
+        const body = `Bonjour,
+
+Veuillez trouver ci-joint mon carnet alimentaire généré sous format PDF, incluant un premier niveau d'analyse diététique.
+
+Cordialement,
+${profileData.prenom || ""} ${profileData.nom || ""}`;
+
+        MailApp.sendEmail({
+            to: profileData.emailPro,
+            subject: subject,
+            body: body,
+            attachments: [pdfBlob]
+        });
+
+        // Optionnel: on pourrait placer le document dans la corbeille pour ne pas encombrer le Drive,
+        // mais cela nécessite l'autorisation DriveApp. On le laisse donc dans le Drive de l'utilisateur.
+
+        ui.alert("Succès", "L'e-mail a bien été envoyé avec la pièce jointe PDF à : " + profileData.emailPro, ui.ButtonSet.OK);
 
     } catch (e) {
-        if (doc) {
-            try { doc.saveAndClose(); } catch (err) { }
-        }
-        SpreadsheetApp.getUi().alert("Erreur lors de la génération :\n" + e.message);
+        ui.alert("Erreur lors de l'envoi :\n" + e.message);
     }
 }
 
