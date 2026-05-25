@@ -832,7 +832,7 @@ N'utilise pas de formatage Markdown complexe, juste du texte simple avec des sau
 
     try {
         MailApp.sendEmail({
-            to: Session.getActiveUser().getEmail(),
+            to: Session.getEffectiveUser().getEmail(),
             subject: "Vos conseils diététiques pour demain 🥗",
             htmlBody: htmlBody
         });
