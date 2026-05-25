@@ -796,8 +796,11 @@ N'utilise pas de formatage Markdown complexe, juste du texte simple avec des sau
             if (result.candidates && result.candidates.length > 0) {
                 aiAdvice = result.candidates[0].content.parts[0].text.trim();
             }
+        } else {
+            aiAdvice = "Erreur API : " + response.getContentText();
         }
     } catch (e) {
+        aiAdvice = "Erreur de connexion : " + e.message;
         console.error("Erreur Gemini Email: " + e.message);
     }
 
