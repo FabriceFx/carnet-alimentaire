@@ -379,9 +379,10 @@ function generateFoodDiaryDoc() {
  * Logique centrale de création du document Google Docs.
  * @param {Array} data Données brutes de la feuille
  * @param {string} tz Fuseau horaire
+ * @param {boolean} [includeAiAnalysis=true] Si true, inclut l'analyse IA à la fin de chaque journée
  * @return {GoogleAppsScript.Document.Document} Le document généré
  */
-function createFoodDiaryDocFile(data, tz) {
+function createFoodDiaryDocFile(data, tz, includeAiAnalysis = true) {
     const todayStr = Utilities.formatDate(new Date(), tz, "dd/MM/yyyy");
     const doc = DocumentApp.create('Export carnet alimentaire - ' + todayStr);
     const body = doc.getBody();
@@ -531,32 +532,35 @@ function createFoodDiaryDocFile(data, tz) {
                 }
             }
 
-            // 1. Préparation des données pour l'analyse avec index dynamiques
-            const repasPourAnalyse = repasDuJour.map(repas => ({
-                periode: repas[iPeriode],
-                heure: repas[iHeure],
-                menu: repas[iMenu],
-                quantite: repas[iQte],
-                cuisson: repas[iCuisson]
-            }));
+            // Optionnel : Analyse IA
+            if (includeAiAnalysis) {
+                // 1. Préparation des données pour l'analyse avec index dynamiques
+                const repasPourAnalyse = repasDuJour.map(repas => ({
+                    periode: repas[iPeriode],
+                    heure: repas[iHeure],
+                    menu: repas[iMenu],
+                    quantite: repas[iQte],
+                    cuisson: repas[iCuisson]
+                }));
 
-            // Appel de l'analyse sémantique
-            const analyseDietetique = analyzeDayNutrition(repasPourAnalyse, profileData);
+                // Appel de l'analyse sémantique
+                const analyseDietetique = analyzeDayNutrition(repasPourAnalyse, profileData);
 
-            // 2. Création du bloc de texte stylisé
-            const pAnalyse = body.appendParagraph('');
-            pAnalyse.setSpacingBefore(8).setSpacingAfter(16);
+                // 2. Création du bloc de texte stylisé
+                const pAnalyse = body.appendParagraph('');
+                pAnalyse.setSpacingBefore(8).setSpacingAfter(16);
 
-            // Style de l'encadré de conseils
-            const styleConseil = {};
-            styleConseil[DocumentApp.Attribute.BACKGROUND_COLOR] = '#EFF6FF';
-            styleConseil[DocumentApp.Attribute.FONT_FAMILY] = 'Arial';
-            styleConseil[DocumentApp.Attribute.FONT_SIZE] = 9.5;
-            styleConseil[DocumentApp.Attribute.FOREGROUND_COLOR] = '#1E40AF';
+                // Style de l'encadré de conseils
+                const styleConseil = {};
+                styleConseil[DocumentApp.Attribute.BACKGROUND_COLOR] = '#EFF6FF';
+                styleConseil[DocumentApp.Attribute.FONT_FAMILY] = 'Arial';
+                styleConseil[DocumentApp.Attribute.FONT_SIZE] = 9.5;
+                styleConseil[DocumentApp.Attribute.FOREGROUND_COLOR] = '#1E40AF';
 
-            // Ajout d'un titre interne à l'encadré
-            const textObj = pAnalyse.appendText("💡 Analyse & Conseils Diététiques :\n" + analyseDietetique);
-            textObj.setAttributes(styleConseil);
+                // Ajout d'un titre interne à l'encadré
+                const textObj = pAnalyse.appendText("💡 Analyse & Conseils Diététiques :\n" + analyseDietetique);
+                textObj.setAttributes(styleConseil);
+            }
 
             body.appendParagraph(''); // Espace entre les journées
         }
@@ -589,12 +593,12 @@ function sendFoodDiaryToPro() {
         return;
     }
 
-    ui.alert("Génération en cours...", "Veuillez patienter pendant que l'IA génère l'analyse et que le PDF se prépare. Cela peut prendre quelques secondes. Cliquez sur OK pour lancer l'envoi.", ui.ButtonSet.OK);
+    ui.alert("Génération en cours...", "Veuillez patienter pendant la mise en page du document et sa conversion en PDF. L'analyse IA est désactivée pour cet export brut. Cliquez sur OK pour lancer l'envoi.", ui.ButtonSet.OK);
 
     let doc;
     try {
         const tz = Session.getScriptTimeZone();
-        doc = createFoodDiaryDocFile(data, tz);
+        doc = createFoodDiaryDocFile(data, tz, false);
         
         const pdfBlob = doc.getAs(MimeType.PDF);
         pdfBlob.setName("Carnet Alimentaire - " + (profileData.nom || "Patient") + ".pdf");
@@ -602,7 +606,7 @@ function sendFoodDiaryToPro() {
         const subject = "Carnet Alimentaire de " + (profileData.prenom || "") + " " + (profileData.nom || "");
         const body = `Bonjour,
 
-Veuillez trouver ci-joint mon carnet alimentaire généré sous format PDF, incluant un premier niveau d'analyse diététique.
+Veuillez trouver ci-joint mon carnet alimentaire généré sous format PDF.
 
 Cordialement,
 ${profileData.prenom || ""} ${profileData.nom || ""}`;
