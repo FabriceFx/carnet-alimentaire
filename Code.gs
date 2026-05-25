@@ -11,6 +11,7 @@ function onOpen() {
         .addToUi();
         
     checkInputSheet();
+    cleanEmptySheets();
 }
 
 /**
@@ -407,4 +408,35 @@ function createFilteredSheet() {
     newSheet.getRange(1, 1, outputData.length, outputData[0].length).setValues(outputData);
     
     SpreadsheetApp.getUi().alert("Feuille créée avec succès !");
+}
+
+/**
+ * Supprime les feuilles entièrement vides (sans données) pour nettoyer le classeur.
+ * Ne supprime pas la feuille si c'est la seule restante, ni les feuilles système (Profil, Carnet).
+ */
+function cleanEmptySheets() {
+    try {
+        const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+        const sheets = spreadsheet.getSheets();
+        
+        let sheetCount = sheets.length;
+        
+        for (let i = sheets.length - 1; i >= 0; i--) {
+            if (sheetCount <= 1) break; // Ne jamais supprimer la dernière feuille
+            
+            const sheet = sheets[i];
+            const name = sheet.getName();
+            
+            // On protège les feuilles principales même si elles sont temporairement vides
+            if (name === "Profil" || name === "Carnet") continue;
+            
+            // Si la feuille est totalement vide
+            if (sheet.getLastRow() === 0) {
+                spreadsheet.deleteSheet(sheet);
+                sheetCount--;
+            }
+        }
+    } catch (e) {
+        // Ignorer les erreurs mineures de nettoyage
+    }
 }
