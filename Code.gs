@@ -221,13 +221,7 @@ function getInputSheet() {
 function generateFoodDiaryDoc() {
     let doc;
     try {
-        let sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-        
-        // Sécurité : On s'assure de ne pas exporter la feuille Profil ou une feuille vide
-        const headersTest = sheet.getMaxColumns() >= 4 ? String(sheet.getRange(1, 1, 1, 4).getValues()[0]).toLowerCase() : "";
-        if (sheet.getName() === "Profil" || !headersTest.includes("menu")) {
-            sheet = getInputSheet();
-        }
+        const sheet = getInputSheet();
         
         if (!sheet) {
             SpreadsheetApp.getUi().alert("Erreur : Feuille de carnet introuvable.");
