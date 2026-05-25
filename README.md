@@ -1,10 +1,10 @@
 # 📦 Carnet Alimentaire
 
-[🇫🇷 Version Française](#-version-française) | [🇬🇧 English Version](#-english-version)
+[🇫🇷 Version française](#-version-française) | [🇬🇧 English Version](#-english-version)
 
 ---
 
-## 🇫🇷 Version Française
+## 🇫🇷 Version française
 
 > Ce projet est une application intégrée à Google Sheets permettant de saisir, suivre et analyser facilement un journal alimentaire quotidien.
 
@@ -16,11 +16,11 @@
 
 ### ✨ Fonctionnalités clés
 
-- 📊 **Saisie Rapide (Sidebar)** : Interface latérale (HTML/CSS) pour saisir rapidement chaque repas.
-- ⚡ **Auto-complétion Intelligente** : Suggère les repas fréquemment saisis.
+- 📊 **Saisie rapide (Sidebar)** : Interface latérale (HTML/CSS) pour saisir rapidement chaque repas.
+- ⚡ **Auto-complétion intelligente** : Suggère les repas fréquemment saisis.
 - 🛠️ **Gestion du Profil** : Espace dédié pour enregistrer ses données personnelles (Poids, Sexe, Objectifs).
 - 🎨 **Interface intégrée MD3** : Interfaces élégantes inspirées de la charte officielle de Google Workspace.
-- 🤖 **Analyse Diététique par IA** : Chaque journée exportée vers Google Docs bénéficie d'une analyse générée par Gemini.
+- 🤖 **Analyse diététique par IA** : Chaque journée exportée vers Google Docs bénéficie d'une analyse générée par Gemini.
 
 ---
 
@@ -47,11 +47,11 @@ Assurez-vous que votre manifeste contient :
 
 ---
 
-### 🤖 Configuration de l'Analyse IA (Gemini)
+### 🤖 Configuration de l'analyse IA (Gemini)
 
 1. Rendez-vous sur Google AI Studio.
 2. Créez une clé API (Create API key).
-3. Dans Google Sheet, menu **Carnet Alimentaire > Paramètres (Clé API)**, collez la clé.
+3. Dans Google Sheet, menu **Carnet alimentaire > Paramètres (Clé API)**, collez la clé.
 
 ---
 

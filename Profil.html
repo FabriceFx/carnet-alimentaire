@@ -25,6 +25,21 @@
       
       <form id="profilForm">
         <div class="form-group">
+          <label for="nom" class="label" data-i18n="lblNom">Nom</label>
+          <input type="text" id="nom" name="nom" class="input">
+        </div>
+
+        <div class="form-group">
+          <label for="prenom" class="label" data-i18n="lblPrenom">Prénom</label>
+          <input type="text" id="prenom" name="prenom" class="input">
+        </div>
+
+        <div class="form-group">
+          <label for="dateNaissance" class="label" data-i18n="lblDateNaiss">Date de naissance</label>
+          <input type="date" id="dateNaissance" name="dateNaissance" class="input">
+        </div>
+
+        <div class="form-group">
           <label for="sexe" class="label" data-i18n="lblSexe">Sexe</label>
           <select id="sexe" name="sexe" class="select">
             <option value="Femme" data-i18n="optFemme">Femme</option>
@@ -36,21 +51,6 @@
         <div class="form-group">
           <label for="poids" class="label" data-i18n="lblPoids">Poids de départ (kg)</label>
           <input type="number" id="poids" name="poids" step="0.1" class="input">
-        </div>
-
-        <div class="form-group">
-          <label for="objectif" class="label" data-i18n="lblObjectif">Objectif principal</label>
-          <textarea id="objectif" name="objectif" class="input"></textarea>
-        </div>
-
-        <div class="form-group">
-          <label for="allergies" class="label" data-i18n="lblAllergies">Allergies / Intolérances</label>
-          <textarea id="allergies" name="allergies" class="input"></textarea>
-        </div>
-
-        <div class="form-group">
-          <label for="infos" class="label" data-i18n="lblInfoComp">Informations complémentaires</label>
-          <textarea id="infos" name="infos" class="input"></textarea>
         </div>
 
         <button type="button" class="btn btn-primary" id="btnSubmit" onclick="saveProfile()">
@@ -78,11 +78,11 @@
         .withSuccessHandler(function(data) {
           hideOverlay();
           if (data) {
+            document.getElementById('nom').value = data.nom || '';
+            document.getElementById('prenom').value = data.prenom || '';
+            document.getElementById('dateNaissance').value = data.dateNaissance || '';
             document.getElementById('sexe').value = data.sexe || 'Femme';
             document.getElementById('poids').value = data.poids || '';
-            document.getElementById('objectif').value = data.objectif || '';
-            document.getElementById('allergies').value = data.allergies || '';
-            document.getElementById('infos').value = data.infos || '';
           }
         })
         .withFailureHandler((error) => {
@@ -98,11 +98,11 @@
       btn.disabled = true;
 
       const profileData = {
+        nom: document.getElementById('nom').value,
+        prenom: document.getElementById('prenom').value,
+        dateNaissance: document.getElementById('dateNaissance').value,
         sexe: document.getElementById('sexe').value,
-        poids: document.getElementById('poids').value,
-        objectif: document.getElementById('objectif').value,
-        allergies: document.getElementById('allergies').value,
-        infos: document.getElementById('infos').value
+        poids: document.getElementById('poids').value
       };
 
       google.script.run

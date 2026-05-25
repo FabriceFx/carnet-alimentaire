@@ -301,15 +301,11 @@ function generateFoodDiaryDoc() {
             let profileText = `Patient: ${profileData.prenom} ${profileData.nom}`;
             if (profileData.dateNaissance) {
                 let dobStr = '';
-                if (profileData.dateNaissance instanceof Date) {
-                    dobStr = Utilities.formatDate(profileData.dateNaissance, tz, "dd/MM/yyyy");
+                const dobDate = new Date(profileData.dateNaissance);
+                if (!isNaN(dobDate.getTime())) {
+                    dobStr = Utilities.formatDate(dobDate, tz, "dd/MM/yyyy");
                 } else {
-                    const dobDate = new Date(profileData.dateNaissance);
-                    if (!isNaN(dobDate.getTime())) {
-                        dobStr = Utilities.formatDate(dobDate, tz, "dd/MM/yyyy");
-                    } else {
-                        dobStr = profileData.dateNaissance;
-                    }
+                    dobStr = profileData.dateNaissance;
                 }
                 if (dobStr) {
                     profileText += `\nNé(e) le: ${dobStr}`;
