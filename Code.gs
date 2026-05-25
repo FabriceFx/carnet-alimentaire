@@ -666,7 +666,7 @@ ${journalTexte}`;
 
     const payload = {
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { maxOutputTokens: 2000, temperature: 0.2 }
+        generationConfig: { temperature: 0.2 }
     };
 
     const options = {
@@ -788,8 +788,7 @@ ${promptLang}`;
     const payload = {
         "contents": [{ "parts": [{ "text": prompt }] }],
         "generationConfig": {
-            "temperature": 0.4,
-            "maxOutputTokens": 1000
+            "temperature": 0.4
         }
     };
 
