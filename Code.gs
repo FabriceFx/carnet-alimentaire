@@ -151,7 +151,18 @@ function saveApiKey(key) {
 }
 
 /**
+ * @typedef {Object} ProfileData
+ * @property {string} nom - Le nom de l'utilisateur
+ * @property {string} prenom - Le prénom de l'utilisateur
+ * @property {string} dateNaissance - La date de naissance au format YYYY-MM-DD
+ * @property {string} sexe - Le sexe de l'utilisateur (Femme, Homme, Autre)
+ * @property {number|string} poids - Le poids de départ en kg
+ */
+
+/**
  * Récupère les données du profil depuis l'onglet "Profil".
+ * 
+ * @return {ProfileData|null} L'objet structuré contenant les données du profil, ou null si la feuille est vide/inexistante.
  */
 function getProfileData() {
     const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Profil");
@@ -184,6 +195,9 @@ function getProfileData() {
 
 /**
  * Sauvegarde les données du profil dans l'onglet "Profil".
+ * 
+ * @param {ProfileData} profileData - L'objet contenant les informations du profil à sauvegarder
+ * @return {{success: boolean, message: string}} Objet de statut indiquant le succès ou l'échec de l'opération
  */
 function saveProfileData(profileData) {
     try {
@@ -219,7 +233,20 @@ function saveProfileData(profileData) {
 }
 
 /**
- * Enregistre les données du repas dans la feuille de calcul.
+ * @typedef {Object} MealData
+ * @property {string} date - La date du repas (YYYY-MM-DD)
+ * @property {string} categorie - La période de la journée (Petit déjeuner, Déjeuner, etc.)
+ * @property {string} heureLieu - L'heure et le lieu combinés ou juste l'heure
+ * @property {string} menu - La description précise du repas
+ * @property {string} quantites - Les quantités combinées avec l'unité (ex: "150 g")
+ * @property {string} cuisson - Le mode de cuisson et l'assaisonnement combinés
+ */
+
+/**
+ * Enregistre les données du repas dans la feuille de calcul principale.
+ * 
+ * @param {MealData} formData - Les données structurées du repas envoyées depuis la Sidebar
+ * @return {{success: boolean, message: string}} Objet de statut de l'opération
  */
 function saveMealData(formData) {
     try {
