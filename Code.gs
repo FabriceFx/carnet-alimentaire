@@ -772,7 +772,7 @@ ${profileStr}
 Donne 3 conseils très courts, concrets et motivants pour l'aider à anticiper et équilibrer ses repas de DEMAIN.
 N'utilise pas de formatage Markdown complexe, juste du texte simple avec des sauts de ligne ou des tirets normaux. Va droit au but, pas de longue introduction.`;
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`;
     const payload = {
         "contents": [{ "parts": [{ "text": prompt }] }],
         "generationConfig": {
