@@ -573,7 +573,7 @@ ${journalTexte}`;
 
     const payload = {
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { maxOutputTokens: 800, temperature: 0.2 }
+        generationConfig: { maxOutputTokens: 2000, temperature: 0.2 }
     };
 
     const options = {
