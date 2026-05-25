@@ -557,8 +557,7 @@ function cleanEmptySheets() {
  * @return {String} L'analyse textuelle formatée
  */
 function analyzeDayNutrition(repasObj, profileData) {
-    // Remplacer par votre clé API stockée de préférence dans les propriétés du script
-    const apiKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
+    const apiKey = getApiKey();
     if (!apiKey) return "Avis diététique indisponible (Clé API manquante dans les propriétés du script).";
 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`;
