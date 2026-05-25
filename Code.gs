@@ -274,10 +274,19 @@ function generateFoodDiaryDoc() {
             "Nuit", "Autres prises alimentaires"
         ];
 
-        // Style des tableaux
-        const styleHeader = {};
+        // Styles des tableaux
+        const styleCell = {};
+        styleCell[DocumentApp.Attribute.FONT_FAMILY] = 'Arial';
+        styleCell[DocumentApp.Attribute.FONT_SIZE] = 10;
+        styleCell[DocumentApp.Attribute.PADDING_TOP] = 6;
+        styleCell[DocumentApp.Attribute.PADDING_BOTTOM] = 6;
+        styleCell[DocumentApp.Attribute.PADDING_LEFT] = 8;
+        styleCell[DocumentApp.Attribute.PADDING_RIGHT] = 8;
+
+        const styleHeader = Object.assign({}, styleCell);
         styleHeader[DocumentApp.Attribute.BACKGROUND_COLOR] = '#F3F4F6';
         styleHeader[DocumentApp.Attribute.BOLD] = true;
+        styleHeader[DocumentApp.Attribute.FONT_SIZE] = 11;
 
         // Génération du contenu pour chaque date
         for (const date in dataByDate) {
@@ -303,10 +312,23 @@ function generateFoodDiaryDoc() {
             });
 
             const table = body.appendTable(cells);
+            table.setBorderWidth(1);
+            table.setBorderColor('#D3D3D3');
 
-            // Formatage basique du tableau
-            for (let i = 0; i < 4; i++) {
-                table.getRow(0).getCell(i).setAttributes(styleHeader);
+            // Largeurs spécifiques des colonnes (total ~500pt)
+            table.setColumnWidth(0, 110);
+            table.setColumnWidth(1, 180);
+            table.setColumnWidth(2, 90);
+            table.setColumnWidth(3, 120);
+
+            // Formatage avancé du tableau
+            const numRows = table.getNumRows();
+            for (let r = 0; r < numRows; r++) {
+                const row = table.getRow(r);
+                for (let c = 0; c < 4; c++) {
+                    const cell = row.getCell(c);
+                    cell.setAttributes(r === 0 ? styleHeader : styleCell);
+                }
             }
 
             body.appendParagraph(''); // Espace entre les journées
