@@ -153,7 +153,11 @@ function saveProfileData(profileData) {
  */
 function saveMealData(formData) {
     try {
-        const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+        const sheet = getInputSheet();
+        if (!sheet) {
+            return { success: false, message: "Erreur : Impossible de trouver la feuille de saisie." };
+        }
+        
         sheet.appendRow([
             formData.date,
             formData.categorie,
@@ -166,6 +170,31 @@ function saveMealData(formData) {
     } catch (error) {
         return { success: false, message: "Erreur : " + error.toString() };
     }
+}
+
+/**
+ * Trouve et retourne la feuille de saisie principale.
+ */
+function getInputSheet() {
+    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    
+    // Essayer de trouver par nom en priorité
+    let sheet = spreadsheet.getSheetByName("Carnet");
+    if (sheet) return sheet;
+    
+    // Sinon, on cherche une feuille qui a les bons en-têtes
+    const sheets = spreadsheet.getSheets();
+    for (let i = 0; i < sheets.length; i++) {
+        if (sheets[i].getMaxColumns() >= 4) {
+            const firstRow = sheets[i].getRange(1, 1, 1, 4).getValues()[0];
+            if (String(firstRow[0]).toLowerCase() === "date" && 
+                String(firstRow[3]).toLowerCase() === "menu précis") {
+                return sheets[i];
+            }
+        }
+    }
+    
+    return null;
 }
 
 /**
