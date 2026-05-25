@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <base target="_top">
+    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            padding: 10px;
+            background-color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        textarea {
+            resize: vertical;
+            height: 60px;
+        }
+
+        #status {
+            margin-top: 15px;
+            padding: 10px;
+            display: none;
+            text-align: center;
+            border-radius: 4px;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="block form-group">
+            <label for="date">Date</label>
+            <input type="date" id="date" style="width: 100%;">
+        </div>
+
+        <div class="block form-group">
+            <label for="categorie">Période du repas</label>
+            <select id="categorie" style="width: 100%;">
+                <option value="Petit déjeuner">Petit déjeuner</option>
+                <option value="Matinée">Matinée</option>
+                <option value="Déjeuner">Déjeuner</option>
+                <option value="Après-midi">Après-midi</option>
+                <option value="Dîner">Dîner</option>
+                <option value="Soirée">Soirée</option>
+                <option value="Nuit">Nuit</option>
+                <option value="Autres prises alimentaires">Autres prises alimentaires</option>
+            </select>
+        </div>
+
+        <div class="block form-group">
+            <label>Heure et lieu</label>
+            <div style="display: flex; gap: 10px;">
+                <input type="time" id="heure" style="flex: 1;">
+                <input type="text" id="lieu" list="lieuxList" placeholder="Lieu (ex: Bureau)" style="flex: 1;">
+                <datalist id="lieuxList">
+                    <option value="Domicile">
+                    <option value="Bureau">
+                    <option value="Restaurant">
+                    <option value="Extérieur">
+                    <option value="Chez des amis">
+                    <option value="Transport">
+                </datalist>
+            </div>
+        </div>
+
+        <div class="block form-group">
+            <label for="menu">Menu précis</label>
+            <textarea id="menu" placeholder="ex: Poulet ratatouille, Salade de fruits" style="width: 100%;"></textarea>
+        </div>
+
+        <div class="block form-group">
+            <label for="quantiteValeur">Quantités</label>
+            <div style="display: flex; gap: 10px;">
+                <input type="number" step="any" id="quantiteValeur" placeholder="Valeur (ex: 150)" style="flex: 1;">
+                <select id="quantiteUnite" style="flex: 1;">
+                    <option value="">(Aucune unité)</option>
+                    <option value="g">g (grammes)</option>
+                    <option value="kg">kg</option>
+                    <option value="ml">ml</option>
+                    <option value="cl">cl</option>
+                    <option value="l">l (litres)</option>
+                    <option value="tasse(s)">tasse(s)</option>
+                    <option value="cuillère(s) à café">cuillère(s) à café</option>
+                    <option value="cuillère(s) à soupe">cuillère(s) à soupe</option>
+                    <option value="verre(s)">verre(s)</option>
+                    <option value="portion(s)">portion(s)</option>
+                    <option value="pièce(s)">pièce(s)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="block form-group">
+            <label>Cuisson / Assaisonnement</label>
+            <div style="display: flex; gap: 10px;">
+                <select id="cuissonList" style="flex: 1;">
+                    <option value="">(Cuisson...)</option>
+                    <option value="Cru">Cru</option>
+                    <option value="Vapeur">Vapeur</option>
+                    <option value="Bouilli / À l'eau">Bouilli / À l'eau</option>
+                    <option value="Poêlé">Poêlé</option>
+                    <option value="Grillé">Grillé</option>
+                    <option value="Rôti / Au four">Rôti / Au four</option>
+                    <option value="Frit">Frit</option>
+                    <option value="Mijoté">Mijoté</option>
+                    <option value="Micro-ondes">Micro-ondes</option>
+                </select>
+                <select id="assaisonnementList" style="flex: 1;">
+                    <option value="">(Assaisonnement...)</option>
+                    <option value="Sans matière grasse">Sans matière grasse</option>
+                    <option value="Huile d'olive">Huile d'olive</option>
+                    <option value="Autre huile">Autre huile</option>
+                    <option value="Beurre">Beurre</option>
+                    <option value="Crème fraîche">Crème fraîche</option>
+                    <option value="Sauce tomate">Sauce tomate</option>
+                    <option value="Vinaigrette">Vinaigrette</option>
+                    <option value="Mayonnaise">Mayonnaise</option>
+                    <option value="Épices / Herbes">Épices / Herbes</option>
+                    <option value="Sel / Poivre">Sel / Poivre</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="block form-group">
+            <button class="action" onclick="submitForm()" style="width: 100%;">Enregistrer</button>
+        </div>
+
+        <div id="status"></div>
+    </div>
+
+    <script>
+        // Définir par défaut la date du jour
+        document.getElementById('date').valueAsDate = new Date();
+
+        function submitForm() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.style.display = 'none';
+
+            const qteVal = document.getElementById('quantiteValeur').value;
+            const qteUnite = document.getElementById('quantiteUnite').value;
+            const quantitesCombine = qteVal ? (qteVal + " " + qteUnite).trim() : "";
+
+            const cVal = document.getElementById('cuissonList').value;
+            const aVal = document.getElementById('assaisonnementList').value;
+            let cuissonArr = [];
+            if (cVal) cuissonArr.push(cVal);
+            if (aVal) cuissonArr.push(aVal);
+            const cuissonCombine = cuissonArr.join(' / ');
+
+            const heureVal = document.getElementById('heure').value;
+            const lieuVal = document.getElementById('lieu').value;
+            let heureLieuArr = [];
+            if (heureVal) heureLieuArr.push(heureVal);
+            if (lieuVal) heureLieuArr.push(lieuVal);
+            const heureLieuCombine = heureLieuArr.join(' - ');
+
+            const formData = {
+                date: document.getElementById('date').value,
+                categorie: document.getElementById('categorie').value,
+                heureLieu: heureLieuCombine,
+                menu: document.getElementById('menu').value,
+                quantites: quantitesCombine,
+                cuisson: cuissonCombine
+            };
+
+            if (!formData.menu) {
+                showStatus("Veuillez remplir le champ 'Menu précis'.", "error");
+                return;
+            }
+
+            google.script.run
+                .withSuccessHandler(function (response) {
+                    if (response.success) {
+                        showStatus(response.message, "success");
+                        // Réinitialisation partielle du formulaire (on garde la date et la période pour enchaîner)
+                        document.getElementById('menu').value = '';
+                        document.getElementById('heure').value = '';
+                        document.getElementById('lieu').value = '';
+                        document.getElementById('quantiteValeur').value = '';
+                        document.getElementById('quantiteUnite').value = '';
+                        document.getElementById('cuissonList').value = '';
+                        document.getElementById('assaisonnementList').value = '';
+                    } else {
+                        showStatus(response.message, "error");
+                    }
+                })
+                .withFailureHandler(function (error) {
+                    showStatus("Une erreur critique est survenue : " + error, "error");
+                })
+                .saveMealData(formData);
+        }
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerText = message;
+            statusDiv.className = type;
+            statusDiv.style.display = 'block';
+        }
+    </script>
+</body>
+
+</html>
