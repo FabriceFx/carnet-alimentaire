@@ -1,5 +1,16 @@
 /**
- * Crée le menu personnalisé à l'ouverture du classeur.
+ * ============================================================================
+ *  CARNET ALIMENTAIRE
+ * ============================================================================
+ *  Auteur      : Fabrice Faucheux (https://faucheux.bzh)
+ *  Projet      : FF Labs - Carnet Alimentaire
+ *  Rôle        : Point d'entrée principal et logique métier serveur.
+ *  Version     : 1.0.0
+ * ============================================================================
+ */
+
+/**
+ * Initialise le menu personnalisé à l'ouverture du Google Sheet.
  */
 function onOpen() {
     SpreadsheetApp.getUi()
@@ -81,11 +92,12 @@ function getFrequentMenus() {
 }
 
 /**
- * Affiche la barre latérale HTML.
+ * Affiche la barre latérale pour saisir un repas.
  */
 function showSidebar() {
-    const html = HtmlService.createHtmlOutputFromFile('Sidebar')
-        .setTitle('Saisie du Carnet Alimentaire');
+    const template = HtmlService.createTemplateFromFile('Sidebar');
+    template.locale = Session.getActiveUserLocale();
+    const html = template.evaluate().setTitle('Saisie de repas').setWidth(300);
     SpreadsheetApp.getUi().showSidebar(html);
 }
 
@@ -93,7 +105,9 @@ function showSidebar() {
  * Affiche la boîte de dialogue du profil utilisateur.
  */
 function showProfile() {
-    const html = HtmlService.createHtmlOutputFromFile('Profil')
+    const template = HtmlService.createTemplateFromFile('Profil');
+    template.locale = Session.getActiveUserLocale();
+    const html = template.evaluate()
         .setTitle('Profil Utilisateur')
         .setWidth(400)
         .setHeight(500);
@@ -104,7 +118,9 @@ function showProfile() {
  * Affiche la boîte de dialogue des paramètres (Clé API).
  */
 function showSettings() {
-    const html = HtmlService.createHtmlOutputFromFile('Settings')
+    const template = HtmlService.createTemplateFromFile('Settings');
+    template.locale = Session.getActiveUserLocale();
+    const html = template.evaluate()
         .setTitle('Paramètres - Intelligence Artificielle')
         .setWidth(450)
         .setHeight(350);

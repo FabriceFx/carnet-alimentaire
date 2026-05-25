@@ -1,50 +1,122 @@
-# Carnet Alimentaire - Google Apps Script
+# 📦 Carnet Alimentaire
 
-Ce projet est une application intégrée à Google Sheets permettant de saisir, suivre et analyser facilement un journal alimentaire quotidien.
-
-## 🌟 Fonctionnalités
-
-- **Saisie Rapide (Sidebar) :** Une barre latérale moderne (HTML/CSS) pour saisir rapidement chaque repas (Période, Heure, Menu, Quantité, Cuisson).
-- **Auto-complétion Intelligente :** Suggère les repas fréquemment saisis pour accélérer la saisie.
-- **Gestion du Profil :** Un espace dédié pour enregistrer ses données personnelles (Poids, Sexe, Objectifs, etc.).
-- **Export Automatique vers Google Docs :** Un script robuste qui regroupe les saisies par journée et génère un document de synthèse propre et mis en forme, prêt à être imprimé ou partagé avec un professionnel de la santé.
-- **Analyse Diététique par IA (Gemini) :** Chaque journée exportée bénéficie d'une analyse sémantique et de conseils diététiques personnalisés générés par l'intelligence artificielle Gemini (Google AI Studio).
-- **Nettoyage Automatique :** Suppression automatique des feuilles vides pour garder le classeur organisé.
-
-## 🚀 Installation & Déploiement
-
-Ce projet est conçu pour être exécuté via [Google Apps Script (clasp)](https://github.com/google/clasp).
-
-1. Clonez ce dépôt.
-2. Assurez-vous d'avoir installé `clasp` via npm (`npm install -g @google/clasp`).
-3. Connectez-vous à votre compte Google (`clasp login`).
-4. Créez un nouveau projet Apps Script lié à une Google Sheet (`clasp create --type sheets` ou modifiez le fichier `.clasp.json` existant pour lier l'ID de votre Sheet).
-5. Poussez le code sur Apps Script (`clasp push`).
-6. Ouvrez votre Google Sheet et autorisez l'exécution du script lors de la première ouverture du menu `Carnet Alimentaire`.
-
-## 🤖 Configuration de l'Analyse IA (Gemini)
-
-Pour activer les conseils diététiques générés par l'intelligence artificielle lors de l'export vers Google Docs, vous devez configurer une clé API gratuite :
-
-1. Rendez-vous sur [Google AI Studio](https://aistudio.google.com/app/apikey) et connectez-vous.
-2. Cliquez sur **"Create API key"** et copiez la clé générée.
-3. Dans votre Google Sheet, allez dans le menu **Carnet Alimentaire > Paramètres (Clé API)**.
-4. Collez la clé dans le champ et cliquez sur Enregistrer.
-
-*Le script utilise le modèle `gemini-3.5-flash` pour garantir des réponses rapides et qualitatives.*
-
-## 📂 Architecture des fichiers
-
-- `Code.gs` : Le cœur logique de l'application (serveur). Contient les fonctions de menu, de traitement des données, de création de documents Docs, et d'appels à l'API Gemini.
-- `Sidebar.html` : L'interface utilisateur HTML/CSS/JS de la barre latérale pour la saisie des repas.
-- `Profil.html` : L'interface de configuration du profil utilisateur.
-- `Settings.html` : L'interface pour configurer la clé API Gemini de manière sécurisée (PropertiesService).
-- `appsscript.json` : Le fichier de manifeste avec les autorisations (OAuth scopes) et la configuration du fuseau horaire.
-
-## 🛡️ Robustesse des Données
-
-- Utilisation exclusive de sélecteurs par nom de feuille ou par contenu d'en-tête (contournement de `getActiveSheet()`) pour éviter d'écraser des données par erreur.
-- La colonne "Menu" est localisée dynamiquement en lisant l'en-tête, rendant le script insensible aux réorganisations manuelles des colonnes par l'utilisateur.
+[🇫🇷 Version Française](#-version-française) | [🇬🇧 English Version](#-english-version)
 
 ---
-*Développé pour simplifier le suivi nutritionnel.*
+
+## 🇫🇷 Version Française
+
+> Ce projet est une application intégrée à Google Sheets permettant de saisir, suivre et analyser facilement un journal alimentaire quotidien.
+
+<a href="https://developers.google.com/apps-script"><img src="https://img.shields.io/badge/Google%20Apps%20Script-4285F4?style=for-the-badge&logo=google-apps-script&logoColor=white" alt="Google Apps Script"></a>
+<a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-indigo?style=for-the-badge" alt="License: MIT"></a>
+<a href="README.md"><img src="https://img.shields.io/badge/Status-Production-brightgreen?style=for-the-badge" alt="Status: Production"></a>
+
+---
+
+### ✨ Fonctionnalités clés
+
+- 📊 **Saisie Rapide (Sidebar)** : Interface latérale (HTML/CSS) pour saisir rapidement chaque repas.
+- ⚡ **Auto-complétion Intelligente** : Suggère les repas fréquemment saisis.
+- 🛠️ **Gestion du Profil** : Espace dédié pour enregistrer ses données personnelles (Poids, Sexe, Objectifs).
+- 🎨 **Interface intégrée MD3** : Interfaces élégantes inspirées de la charte officielle de Google Workspace.
+- 🤖 **Analyse Diététique par IA** : Chaque journée exportée vers Google Docs bénéficie d'une analyse générée par Gemini.
+
+---
+
+### 🚀 Installation & configuration
+
+#### 1. Déploiement avec Clasp
+1. Clonez ce dépôt.
+2. Assurez-vous d'avoir installé `clasp` (`npm install -g @google/clasp`).
+3. Connectez-vous à Google (`clasp login`).
+4. Créez un projet Apps Script lié à un Sheet ou poussez (`clasp push`).
+
+#### 2. Déclaration des scopes requis (`appsscript.json`)
+Assurez-vous que votre manifeste contient :
+```json
+{
+  "oauthScopes": [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/script.container.ui",
+    "https://www.googleapis.com/auth/documents",
+    "https://www.googleapis.com/auth/script.external_request"
+  ]
+}
+```
+
+---
+
+### 🤖 Configuration de l'Analyse IA (Gemini)
+
+1. Rendez-vous sur Google AI Studio.
+2. Créez une clé API (Create API key).
+3. Dans Google Sheet, menu **Carnet Alimentaire > Paramètres (Clé API)**, collez la clé.
+
+---
+
+### 👤 Auteur
+
+- **[Fabrice Faucheux](https://faucheux.bzh)** (FF Labs) — [GitHub](https://github.com/FabriceFx)
+
+---
+
+### 📄 Licence
+
+Ce projet est sous licence MIT.
+
+---
+
+## 🇬🇧 English Version
+
+> This project is a Google Sheets add-on designed to easily input, track, and analyze a daily food diary.
+
+<a href="https://developers.google.com/apps-script"><img src="https://img.shields.io/badge/Google%20Apps%20Script-4285F4?style=for-the-badge&logo=google-apps-script&logoColor=white" alt="Google Apps Script"></a>
+<a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-indigo?style=for-the-badge" alt="License: MIT"></a>
+<a href="README.md"><img src="https://img.shields.io/badge/Status-Production-brightgreen?style=for-the-badge" alt="Status: Production"></a>
+
+---
+
+### ✨ Key Features
+
+- 📊 **Quick Input (Sidebar)**: Side interface (HTML/CSS) to quickly input each meal.
+- ⚡ **Smart Autocomplete**: Suggests frequently entered meals.
+- 🛠️ **Profile Management**: Dedicated space to record personal data.
+- 🎨 **Integrated MD3 UI**: Elegant interfaces inspired by official Google Workspace design.
+- 🤖 **AI Dietary Analysis**: Every exported day to Google Docs gets an analysis powered by Gemini.
+
+---
+
+### 🚀 Installation & Setup
+
+#### 1. Deployment via Clasp
+1. Clone this repository.
+2. Ensure `clasp` is installed (`npm install -g @google/clasp`).
+3. Login to Google (`clasp login`).
+4. Push to Apps Script (`clasp push`).
+
+#### 2. Declaring OAuth Scopes (`appsscript.json`)
+Ensure your manifest contains required scopes (Spreadsheets, UI, Documents, External Requests).
+
+---
+
+### 🤖 AI Analysis Setup (Gemini)
+
+1. Go to Google AI Studio.
+2. Generate an API Key.
+3. In Google Sheets, menu **Carnet Alimentaire > Settings (API Key)**, paste your key.
+
+---
+
+### 👤 Author
+
+- **[Fabrice Faucheux](https://faucheux.bzh)** (FF Labs) — [GitHub](https://github.com/FabriceFx)
+
+---
+
+### 📄 License
+
+This project is licensed under the MIT License.
+
+---
+<p align="center"><a href="https://faucheux.bzh" target="_blank" style="color: inherit; text-decoration: none;">&lt;&gt; par Fabrice Faucheux</a></p>

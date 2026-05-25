@@ -1,0 +1,149 @@
+<script>
+  // 1. Récupération de la locale injectée par le serveur (défaut : 'en')
+  const USER_LOCALE = "<?!= locale ?>".toLowerCase().startsWith('fr') ? 'fr' : 'en';
+
+  // 2. Dictionnaire de traduction global de l'application
+  const TRANSLATIONS = {
+    fr: {
+      // Header commun
+      headerTitle: "Carnet Alimentaire",
+      headerSubtitle: "Suivez vos repas quotidiens",
+      // Menu Sidebar
+      cardSaisieTitle: "Nouveau repas",
+      lblDate: "Date",
+      lblPeriode: "Période",
+      lblHeure: "Heure",
+      lblMenu: "Menu précis",
+      lblQte: "Quantités",
+      lblCuisson: "Cuisson / Assaisonnement",
+      btnSaveMeal: "Enregistrer le repas",
+      btnSaving: "Enregistrement...",
+      // Profil
+      headerProfilSubtitle: "Informations personnelles",
+      cardProfilTitle: "Données de base",
+      lblSexe: "Sexe",
+      lblPoids: "Poids de départ (kg)",
+      lblObjectif: "Objectif principal",
+      lblAllergies: "Allergies / Intolérances",
+      lblInfoComp: "Informations complémentaires",
+      btnSaveProfile: "Mettre à jour le profil",
+      // Paramètres (Clé API)
+      headerSettingsSubtitle: "Intelligence Artificielle",
+      infoApiKey: "L'analyse diététique de votre carnet est propulsée par l'intelligence artificielle Gemini de Google. Pour l'activer, vous devez fournir une clé API (gratuite) :",
+      linkApiKey: "Google AI Studio",
+      lblApiKey: "Clé API Gemini",
+      btnSaveSettings: "Enregistrer la clé",
+      // Options de listes
+      optSelectDate: "Sélectionnez une date...",
+      optSelectTime: "Heure inconnue",
+      optPetitDej: "Petit déjeuner",
+      optMatinee: "Matinée",
+      optDejeuner: "Déjeuner",
+      optApresMidi: "Après-midi",
+      optDiner: "Dîner",
+      optSoiree: "Soirée",
+      optNuit: "Nuit",
+      optAutres: "Autres prises alimentaires",
+      optFemme: "Femme",
+      optHomme: "Homme",
+      optAutre: "Autre",
+      // Messages génériques
+      msgSuccess: "✅ Opération réussie",
+      msgError: "❌ Erreur",
+      footerHelp: "Aide"
+    },
+    en: {
+      // Common Header
+      headerTitle: "Food Diary",
+      headerSubtitle: "Track your daily meals",
+      // Sidebar Menu
+      cardSaisieTitle: "New meal",
+      lblDate: "Date",
+      lblPeriode: "Period",
+      lblHeure: "Time",
+      lblMenu: "Detailed menu",
+      lblQte: "Quantities",
+      lblCuisson: "Cooking / Seasoning",
+      btnSaveMeal: "Save meal",
+      btnSaving: "Saving...",
+      // Profile
+      headerProfilSubtitle: "Personal information",
+      cardProfilTitle: "Basic data",
+      lblSexe: "Gender",
+      lblPoids: "Starting weight (kg)",
+      lblObjectif: "Main goal",
+      lblAllergies: "Allergies / Intolerances",
+      lblInfoComp: "Additional information",
+      btnSaveProfile: "Update profile",
+      // Settings (API Key)
+      headerSettingsSubtitle: "Artificial Intelligence",
+      infoApiKey: "The dietary analysis of your diary is powered by Google's Gemini AI. To enable it, you must provide a (free) API key:",
+      linkApiKey: "Google AI Studio",
+      lblApiKey: "Gemini API Key",
+      btnSaveSettings: "Save key",
+      // List options
+      optSelectDate: "Select a date...",
+      optSelectTime: "Unknown time",
+      optPetitDej: "Breakfast",
+      optMatinee: "Morning snack",
+      optDejeuner: "Lunch",
+      optApresMidi: "Afternoon snack",
+      optDiner: "Dinner",
+      optSoiree: "Evening snack",
+      optNuit: "Night snack",
+      optAutres: "Other meals",
+      optFemme: "Female",
+      optHomme: "Male",
+      optAutre: "Other",
+      // Generic messages
+      msgSuccess: "✅ Operation successful",
+      msgError: "❌ Error",
+      footerHelp: "Help"
+    }
+  };
+
+  // Raccourci pour obtenir une traduction
+  function getTxt(key) {
+    return TRANSLATIONS[USER_LOCALE][key] || TRANSLATIONS['en'][key] || key;
+  }
+
+  // 3. Application dynamique des traductions basées sur les attributs data-i18n
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (el.tagName === 'INPUT' && el.type === 'button') {
+        el.value = getTxt(key);
+      } else if (el.tagName === 'INPUT' && el.type === 'text') {
+        el.placeholder = getTxt(key);
+      } else {
+        el.textContent = getTxt(key);
+      }
+    });
+  });
+
+  // Utilitaires de Toast et d'Overlay
+  function showOverlay() {
+    const overlay = document.getElementById("loadingOverlay");
+    if (overlay) overlay.classList.add("show");
+  }
+
+  function hideOverlay() {
+    const overlay = document.getElementById("loadingOverlay");
+    if (overlay) overlay.classList.remove("show");
+  }
+
+  function showToast(message, type = 'success') {
+    let toast = document.getElementById('toastNotification');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'toastNotification';
+      document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.className = `toast show ${type}`;
+    
+    setTimeout(() => {
+      toast.classList.remove('show');
+    }, 3000);
+  }
+</script>
