@@ -203,7 +203,7 @@ function getProfileData() {
     const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Profil");
     if (!sheet || sheet.getLastRow() < 2) return null;
 
-    const data = sheet.getRange(2, 1, 1, 5).getValues()[0];
+    const data = sheet.getRange(2, 1, 1, 6).getValues()[0];
     if (!data || data.length === 0) return null;
 
     let dob = '';
@@ -224,7 +224,8 @@ function getProfileData() {
         prenom: data[1] || '',
         dateNaissance: dob,
         sexe: data[3] || 'Non précisé',
-        poids: data[4] || ''
+        poids: data[4] || '',
+        emailPro: data[5] || ''
     };
 }
 
@@ -239,11 +240,15 @@ function saveProfileData(profileData) {
         const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
         let sheet = spreadsheet.getSheetByName("Profil");
 
+        const headers = ["Nom", "Prénom", "Date de naissance", "Sexe", "Poids de départ (kg)", "Email Médecin"];
+
         if (!sheet) {
             sheet = spreadsheet.insertSheet("Profil");
-            const headers = ["Nom", "Prénom", "Date de naissance", "Sexe", "Poids de départ (kg)"];
             sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
             sheet.getRange(1, 1, 1, headers.length).setFontWeight("bold").setBackground("#f3f3f3");
+        } else {
+            // Mettre à jour les en-têtes si on a ajouté une colonne entre-temps
+            sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
         }
 
         const rowData = [
@@ -251,10 +256,11 @@ function saveProfileData(profileData) {
             profileData.prenom,
             profileData.dateNaissance,
             profileData.sexe,
-            profileData.poids
+            profileData.poids,
+            profileData.emailPro || ''
         ];
 
-        sheet.getRange(2, 1, 1, 5).setValues([rowData]);
+        sheet.getRange(2, 1, 1, headers.length).setValues([rowData]);
 
         // S'assurer que la feuille Profil reste masquée
         if (!sheet.isSheetHidden()) {
