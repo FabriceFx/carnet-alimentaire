@@ -483,7 +483,13 @@ function generateFoodDiaryDoc() {
         
         const docUrl = doc.getUrl();
         const ui = SpreadsheetApp.getUi();
-        ui.alert("Document généré avec succès !", "Vous pouvez y accéder ici : " + docUrl, ui.ButtonSet.OK);
+        const htmlOutput = HtmlService.createHtmlOutput(`
+            <div style="font-family: 'Inter', sans-serif; text-align: center; padding: 15px;">
+                <p style="font-size: 14px; margin-bottom: 20px;">Votre carnet alimentaire a été généré sous forme de document Google Docs avec succès.</p>
+                <a href="${docUrl}" target="_blank" style="background-color: #0b57d0; color: white; padding: 10px 20px; text-decoration: none; border-radius: 20px; font-size: 14px; font-weight: 500; display: inline-block;">Ouvrir le document</a>
+            </div>
+        `).setWidth(400).setHeight(150);
+        ui.showModalDialog(htmlOutput, 'Document généré avec succès !');
         
     } catch (e) {
         if (doc) {
