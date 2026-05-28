@@ -16,7 +16,7 @@
 
 ### ✨ Fonctionnalités clés
 
-- 📊 **Saisie rapide (Sidebar)** : Interface latérale (HTML/CSS) pour saisir rapidement chaque repas.
+- 📊 **Saisie rapide (Sidebar)** : Interface latérale (HTML/CSS/Google Apps Script) pour saisir rapidement chaque repas.
 - ⚡ **Auto-complétion intelligente** : Suggère les repas fréquemment saisis.
 - 🛠️ **Gestion du Profil** : Espace dédié pour enregistrer ses données personnelles (Poids, Sexe, Objectifs).
 - 🎨 **Interface intégrée MD3** : Interfaces élégantes inspirées de la charte officielle de Google Workspace.
@@ -79,7 +79,7 @@ Ce projet est sous licence MIT.
 
 ### ✨ Key Features
 
-- 📊 **Quick Input (Sidebar)**: Side interface (HTML/CSS) to quickly input each meal.
+- 📊 **Quick Input (Sidebar)**: Side interface (HTML/CSS/Google Apps Script) to quickly input each meal.
 - ⚡ **Smart Autocomplete**: Suggests frequently entered meals.
 - 🛠️ **Profile Management**: Dedicated space to record personal data.
 - 🎨 **Integrated MD3 UI**: Elegant interfaces inspired by official Google Workspace design.
